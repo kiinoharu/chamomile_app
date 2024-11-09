@@ -91,3 +91,20 @@ Migrating to DeviseCreateUsers (20241109122904)
   [1m[36mTRANSACTION (0.6ms)[0m  [1m[35mCOMMIT[0m
   [1m[35m (0.3ms)[0m  [1m[34mSELECT RELEASE_LOCK('5878493172211724820')[0m
   [1m[36mActiveRecord::SchemaMigration Pluck (0.8ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m
+  [1m[35m (0.7ms)[0m  [1m[34mSELECT GET_LOCK('5878493172211724820', 0)[0m
+  [1m[36mActiveRecord::SchemaMigration Pluck (5.5ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m
+Migrating to CreateRecords (20241109124051)
+  [1m[35m (11.1ms)[0m  [1m[34mSELECT RELEASE_LOCK('5878493172211724820')[0m
+  [1m[35m (0.2ms)[0m  [1m[34mSELECT GET_LOCK('5878493172211724820', 0)[0m
+  [1m[36mActiveRecord::SchemaMigration Pluck (0.9ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m
+Migrating to CreateRecords (20241109124051)
+  [1m[35m (78.6ms)[0m  [1m[35mCREATE TABLE `records` (`id` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY, `user_id` bigint NOT NULL, `record_date` date NOT NULL, `temperature` decimal(4,1), `weight` decimal(5,1), `note` text, `is_period_start` tinyint(1) DEFAULT FALSE, `is_period_end` tinyint(1) DEFAULT FALSE, `is_discharge` tinyint(1) DEFAULT FALSE, `is_spotting` tinyint(1) DEFAULT FALSE, `is_taking_pill` tinyint(1) DEFAULT FALSE, `created_at` datetime(6) NOT NULL, `updated_at` datetime(6) NOT NULL, INDEX `index_records_on_user_id` (`user_id`), CONSTRAINT `fk_rails_9ba3ba9afc`
+FOREIGN KEY (`user_id`)
+  REFERENCES `users` (`id`)
+)[0m
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[35mBEGIN[0m
+  [1m[36mActiveRecord::SchemaMigration Create (12.5ms)[0m  [1m[32mINSERT INTO `schema_migrations` (`version`) VALUES ('20241109124051')[0m
+  [1m[36mTRANSACTION (0.9ms)[0m  [1m[35mCOMMIT[0m
+  [1m[36mActiveRecord::InternalMetadata Load (0.6ms)[0m  [1m[34mSELECT `ar_internal_metadata`.* FROM `ar_internal_metadata` WHERE `ar_internal_metadata`.`key` = 'environment' LIMIT 1[0m
+  [1m[35m (0.3ms)[0m  [1m[34mSELECT RELEASE_LOCK('5878493172211724820')[0m
+  [1m[36mActiveRecord::SchemaMigration Pluck (0.4ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m

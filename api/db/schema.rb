@@ -10,7 +10,23 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.0].define(version: 2024_11_09_122904) do
+ActiveRecord::Schema[7.0].define(version: 2024_11_09_124051) do
+  create_table "records", charset: "utf8mb3", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.date "record_date", null: false
+    t.decimal "temperature", precision: 4, scale: 1
+    t.decimal "weight", precision: 5, scale: 1
+    t.text "note"
+    t.boolean "is_period_start", default: false
+    t.boolean "is_period_end", default: false
+    t.boolean "is_discharge", default: false
+    t.boolean "is_spotting", default: false
+    t.boolean "is_taking_pill", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_records_on_user_id"
+  end
+
   create_table "users", charset: "utf8mb3", force: :cascade do |t|
     t.string "name", default: "", null: false
     t.string "encrypted_password", default: "", null: false
@@ -19,4 +35,5 @@ ActiveRecord::Schema[7.0].define(version: 2024_11_09_122904) do
     t.datetime "updated_at", null: false
   end
 
+  add_foreign_key "records", "users"
 end
