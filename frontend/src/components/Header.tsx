@@ -53,7 +53,7 @@ const Header: React.FC = () => {
           <Link to="/" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>ホーム</Link>
           {/* <Link to="/record" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>記録</Link>
           <Link to="/statistics" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>統計</Link> */}
-          <Link to="/announcement" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>アナウンス</Link>
+          <Link to="/announcement" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>掲示板</Link>
           <Link to="/settings" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>設定</Link>
           <Link to="/usageguide" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>使い方</Link>
           {/* マイページリンク（ログイン時のみ表示） */}

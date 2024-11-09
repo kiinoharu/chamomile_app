@@ -40,7 +40,7 @@ const AnnouncementPage: React.FC = () => {
     <Layout>
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px 0' }}>
         <div style={{ textAlign: 'center', maxWidth: '500px', width: '100%', padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
-          <h2 style={{ marginBottom: '20px', color: '#FF69B4' }}>⚠️重要⚠️<br/>アナウンス</h2>
+          <h2 style={{ marginBottom: '20px', color: '#FF69B4' }}>掲示板</h2>
           <ul style={{ textAlign: 'left', padding: '0', listStyleType: 'none', maxHeight: '400px', overflowY: 'auto' }}>
             {announcements.map((announcement, index) => (
               <li 
