@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 
 const LoginPage: React.FC = () => {
-  const { login } = useAuth();
+  const { login, guestLogin } = useAuth();
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -11,9 +11,14 @@ const LoginPage: React.FC = () => {
     alert('ログインしました');
   };
 
+  const handleGuestLogin = () => {
+    guestLogin();
+    alert('ゲストとしてログインしました');
+  };
+
   return (
     <Layout>
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <div style={{ textAlign: 'center', maxWidth: '400px', width: '100%', padding: '20px', backgroundColor: '#f5f5f5', borderRadius: '8px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }}>
           <h2 style={{ marginBottom: '20px', color: '#FF69B4' }}>ログイン</h2>
           <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column' }}>
@@ -55,6 +60,24 @@ const LoginPage: React.FC = () => {
               ログイン
             </button>
           </form>
+
+          {/* ゲストログインボタン */}
+          <button 
+            onClick={handleGuestLogin}
+            style={{
+              padding: '10px',
+              marginTop: '20px',
+              backgroundColor: '#6a1b9a',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              width: '100%',
+            }}
+          >
+            ゲストログイン
+          </button>
         </div>
       </div>
     </Layout>

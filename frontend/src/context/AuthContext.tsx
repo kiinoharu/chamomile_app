@@ -4,6 +4,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: () => void;
   logout: () => void;
+  guestLogin: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -14,8 +15,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const login = () => setIsAuthenticated(true);
   const logout = () => setIsAuthenticated(false);
 
+    // guestLoginメソッドの実装
+  const guestLogin = () => {
+      setIsAuthenticated(true);
+      console.log("ゲストとしてログインしました");
+      // 必要に応じてゲスト用の処理を追加
+  };
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, login, logout, guestLogin }}>
       {children}
     </AuthContext.Provider>
   );
