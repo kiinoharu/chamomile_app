@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
+import apiClient from '../api/apiClient';
 
 const LoginPage: React.FC = () => {
   const { login, guestLogin } = useAuth();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
+    try {
+      const response = await apiClient.post('/login', { username, password });
+      console.log(response.data);
+    } catch (error) {
+      console.error('Login error:', error);
+    }
     e.preventDefault();
     login();
     alert('ログインしました');
@@ -25,6 +34,8 @@ const LoginPage: React.FC = () => {
             <input 
               type="text" 
               placeholder="ユーザー名" 
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)}
               style={{
                 padding: '10px',
                 margin: '10px 0',
@@ -36,6 +47,8 @@ const LoginPage: React.FC = () => {
             <input 
               type="password" 
               placeholder="パスワード" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
               style={{
                 padding: '10px',
                 margin: '10px 0',
@@ -46,6 +59,7 @@ const LoginPage: React.FC = () => {
             />
             <button 
               type="submit" 
+              onClick={handleLogin}
               style={{
                 padding: '10px',
                 marginTop: '20px',

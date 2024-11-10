@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
+import apiClient from '../api/apiClient';
 
 const SignUpPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [cycle, setCycle] = useState<number | ''>(''); // 生理平均周期
 
-  const handleSignUp = (e: React.FormEvent) => {
+  const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // データを保存する（ローカルストレージに一時保存する例）
-    const userData = { username, password, cycle };
-    localStorage.setItem('userData', JSON.stringify(userData));
-    
-    alert('ユーザー登録が完了しました');
-  };
+   // データをAPIに送信
+   const userData = { user: { username, password, cycle } };
+   console.log('User data:', userData); 
+   try {
+     const response = await apiClient.post('http://localhost:3001/users', userData );
+     console.log('User registered:', response.data);
+     alert('ユーザー登録が完了しました');
+   } catch (error) {
+     console.error('Error during sign-up:', error);
+     alert('登録に失敗しました。再度お試しください。');
+   }
+ };
 
   return (
     <Layout>

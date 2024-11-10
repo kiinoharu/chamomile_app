@@ -5,7 +5,7 @@ class Record < ApplicationRecord
   validates :temperature, numericality: { greater_than_or_equal_to: 35.0, less_than_or_equal_to: 42.0 }, allow_nil: true
   validates :weight, numericality: { greater_than_or_equal_to: 0.0, less_than_or_equal_to: 300.0 }, allow_nil: true
   validates :note, length: { maximum: 500 }, allow_blank: true
-  validate :period_start_and_end_cannot_be_true
+  validate  :period_start_and_end_cannot_be_true
 
   private
 

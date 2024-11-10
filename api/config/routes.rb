@@ -1,8 +1,12 @@
 Rails.application.routes.draw do
-  devise_for :users
+  get 'records/index'
+  get 'records/create'
+  devise_for :users, controllers: {
+    registrations: 'users/registrations'
+  }
   namespace :api do
     namespace :v1 do
-      get 'ping', to: 'test#ping'
+      resources :records, only: [:index, :show, :create]
     end
   end
 end
