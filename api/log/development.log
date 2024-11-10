@@ -1334,3 +1334,195 @@ Processing by Rails::WelcomeController#index as HTML
 Completed 200 OK in 1ms (Views: 0.3ms | ActiveRecord: 0.0ms | Allocations: 216)
 
 
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:17:30 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"date"=>"2024-11-10", "temperature"=>"36", "weight"=>"60", "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+Completed 500 Internal Server Error in 315ms (ActiveRecord: 188.5ms | Allocations: 8410)
+
+
+  
+ActiveModel::UnknownAttributeError (unknown attribute 'date' for Record.):
+  
+app/controllers/api/v1/records_controller.rb:18:in `create'
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:17:47 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"date"=>"2024-11-10", "temperature"=>"36", "weight"=>"60", "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+Completed 500 Internal Server Error in 3ms (ActiveRecord: 0.0ms | Allocations: 647)
+
+
+  
+ActiveModel::UnknownAttributeError (unknown attribute 'date' for Record.):
+  
+app/controllers/api/v1/records_controller.rb:18:in `create'
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:18:33 +0900
+  [1m[36mActiveRecord::SchemaMigration Pluck (4.6ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"date"=>"2024-11-10", "temperature"=>"36", "weight"=>"60", "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+Completed 500 Internal Server Error in 28ms (ActiveRecord: 17.3ms | Allocations: 10839)
+
+
+  
+ActiveModel::UnknownAttributeError (unknown attribute 'date' for Record.):
+  
+app/controllers/api/v1/records_controller.rb:18:in `create'
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:18:50 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"date"=>"2024-11-10", "temperature"=>"36.5", "weight"=>"70", "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+Completed 500 Internal Server Error in 3ms (ActiveRecord: 0.0ms | Allocations: 653)
+
+
+  
+ActiveModel::UnknownAttributeError (unknown attribute 'date' for Record.):
+  
+app/controllers/api/v1/records_controller.rb:18:in `create'
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:18:58 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"date"=>"2024-11-10", "temperature"=>"36.5", "weight"=>"70", "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+Completed 500 Internal Server Error in 3ms (ActiveRecord: 0.0ms | Allocations: 652)
+
+
+  
+ActiveModel::UnknownAttributeError (unknown attribute 'date' for Record.):
+  
+app/controllers/api/v1/records_controller.rb:18:in `create'
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:25:14 +0900
+  [1m[36mActiveRecord::SchemaMigration Pluck (3.9ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"record_date"=>"2024-11-10", "temperature"=>36.5, "weight"=>60, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+[31mUnpermitted parameter: :record_date. Context: { controller: Api::V1::RecordsController, action: create, request: #<ActionDispatch::Request:0x000000010f953480>, params: {"record"=>{"record_date"=>"2024-11-10", "temperature"=>36.5, "weight"=>60, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}, "controller"=>"api/v1/records", "action"=>"create"} }[0m
+  [1m[36mTRANSACTION (0.9ms)[0m  [1m[35mBEGIN[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mRecord Exists? (20.9ms)[0m  [1m[34mSELECT 1 AS one FROM `records` WHERE `records`.`record_date` IS NULL AND `records`.`user_id` IS NULL LIMIT 1[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mTRANSACTION (2.5ms)[0m  [1m[31mROLLBACK[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+Completed 422 Unprocessable Entity in 81ms (Views: 3.6ms | ActiveRecord: 54.7ms | Allocations: 19003)
+
+
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:28:25 +0900
+  [1m[36mActiveRecord::SchemaMigration Pluck (2.3ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"record_date"=>"2024-11-10", "temperature"=>nil, "weight"=>nil, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+  [1m[36mTRANSACTION (1.9ms)[0m  [1m[35mBEGIN[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mRecord Exists? (4.3ms)[0m  [1m[34mSELECT 1 AS one FROM `records` WHERE `records`.`record_date` = '2024-11-10' AND `records`.`user_id` IS NULL LIMIT 1[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mTRANSACTION (1.3ms)[0m  [1m[31mROLLBACK[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+Completed 422 Unprocessable Entity in 63ms (Views: 3.8ms | ActiveRecord: 42.0ms | Allocations: 17776)
+
+
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:31:03 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"record_date"=>"2024-11-10", "temperature"=>36, "weight"=>60, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+  [1m[36mTRANSACTION (36.0ms)[0m  [1m[35mBEGIN[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mRecord Exists? (28.7ms)[0m  [1m[34mSELECT 1 AS one FROM `records` WHERE `records`.`record_date` = '2024-11-10' AND `records`.`user_id` IS NULL LIMIT 1[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mTRANSACTION (3.4ms)[0m  [1m[31mROLLBACK[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+Completed 422 Unprocessable Entity in 90ms (Views: 1.0ms | ActiveRecord: 68.0ms | Allocations: 3306)
+
+
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:31:16 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"record_date"=>"2024-11-10", "temperature"=>36, "weight"=>60, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+  [1m[36mTRANSACTION (1.5ms)[0m  [1m[35mBEGIN[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mRecord Exists? (2.1ms)[0m  [1m[34mSELECT 1 AS one FROM `records` WHERE `records`.`record_date` = '2024-11-10' AND `records`.`user_id` IS NULL LIMIT 1[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mTRANSACTION (0.4ms)[0m  [1m[31mROLLBACK[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+Completed 422 Unprocessable Entity in 18ms (Views: 1.2ms | ActiveRecord: 4.0ms | Allocations: 3214)
+
+
+Started POST "/users/sign_in" for ::1 at 2024-11-10 14:32:16 +0900
+Processing by Devise::SessionsController#create as HTML
+  Parameters: {"user"=>{"username"=>"haruki", "password"=>"[FILTERED]"}, "session"=>{"user"=>{"username"=>"haruki", "password"=>"[FILTERED]"}}}
+  [1m[36mUser Load (2.4ms)[0m  [1m[34mSELECT `users`.* FROM `users` WHERE `users`.`username` = 'haruki' ORDER BY `users`.`id` ASC LIMIT 1[0m
+Redirected to http://localhost:3001/
+Completed 303 See Other in 448ms (ActiveRecord: 81.3ms | Allocations: 8761)
+
+
+Started GET "/" for ::1 at 2024-11-10 14:32:16 +0900
+Processing by Rails::WelcomeController#index as HTML
+  Parameters: {"welcome"=>{}}
+  Rendering /Users/koume/.rbenv/versions/3.2.0/lib/ruby/gems/3.2.0/gems/railties-7.0.8.6/lib/rails/templates/rails/welcome/index.html.erb
+  Rendered /Users/koume/.rbenv/versions/3.2.0/lib/ruby/gems/3.2.0/gems/railties-7.0.8.6/lib/rails/templates/rails/welcome/index.html.erb (Duration: 1.4ms | Allocations: 480)
+Completed 200 OK in 4ms (Views: 1.9ms | ActiveRecord: 0.0ms | Allocations: 1691)
+
+
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:32:26 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"record_date"=>"2024-11-1", "temperature"=>36, "weight"=>60, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+  [1m[36mTRANSACTION (0.3ms)[0m  [1m[35mBEGIN[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mRecord Exists? (0.6ms)[0m  [1m[34mSELECT 1 AS one FROM `records` WHERE `records`.`record_date` = '2024-11-01' AND `records`.`user_id` IS NULL LIMIT 1[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mTRANSACTION (0.2ms)[0m  [1m[31mROLLBACK[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+Completed 422 Unprocessable Entity in 10ms (Views: 0.5ms | ActiveRecord: 1.1ms | Allocations: 3244)
+
+
+Started POST "/users/sign_in" for ::1 at 2024-11-10 14:35:00 +0900
+Processing by Devise::SessionsController#create as HTML
+  Parameters: {"user"=>{"username"=>"haruki", "password"=>"[FILTERED]"}, "session"=>{"user"=>{"username"=>"haruki", "password"=>"[FILTERED]"}}}
+  [1m[36mUser Load (120.0ms)[0m  [1m[34mSELECT `users`.* FROM `users` WHERE `users`.`username` = 'haruki' ORDER BY `users`.`id` ASC LIMIT 1[0m
+Redirected to http://localhost:3001/
+Completed 303 See Other in 424ms (ActiveRecord: 120.0ms | Allocations: 2771)
+
+
+Started GET "/" for ::1 at 2024-11-10 14:35:00 +0900
+Processing by Rails::WelcomeController#index as HTML
+  Parameters: {"welcome"=>{}}
+  Rendering /Users/koume/.rbenv/versions/3.2.0/lib/ruby/gems/3.2.0/gems/railties-7.0.8.6/lib/rails/templates/rails/welcome/index.html.erb
+  Rendered /Users/koume/.rbenv/versions/3.2.0/lib/ruby/gems/3.2.0/gems/railties-7.0.8.6/lib/rails/templates/rails/welcome/index.html.erb (Duration: 1.7ms | Allocations: 272)
+Completed 200 OK in 3ms (Views: 2.3ms | ActiveRecord: 0.0ms | Allocations: 842)
+
+
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:35:12 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"user_id"=>1, "record_date"=>"2024-11-10", "temperature"=>36, "weight"=>60, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+[31mUnpermitted parameter: :user_id. Context: { controller: Api::V1::RecordsController, action: create, request: #<ActionDispatch::Request:0x000000010f165480>, params: {"record"=>{"user_id"=>1, "record_date"=>"2024-11-10", "temperature"=>36, "weight"=>60, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}, "controller"=>"api/v1/records", "action"=>"create"} }[0m
+  [1m[36mTRANSACTION (2.3ms)[0m  [1m[35mBEGIN[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mRecord Exists? (4.9ms)[0m  [1m[34mSELECT 1 AS one FROM `records` WHERE `records`.`record_date` = '2024-11-10' AND `records`.`user_id` IS NULL LIMIT 1[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mTRANSACTION (4.1ms)[0m  [1m[31mROLLBACK[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+Completed 422 Unprocessable Entity in 21ms (Views: 0.5ms | ActiveRecord: 11.2ms | Allocations: 3308)
+
+
+Started POST "/users/sign_in" for ::1 at 2024-11-10 14:37:11 +0900
+  [1m[36mActiveRecord::SchemaMigration Pluck (4.1ms)[0m  [1m[34mSELECT `schema_migrations`.`version` FROM `schema_migrations` ORDER BY `schema_migrations`.`version` ASC[0m
+Processing by Devise::SessionsController#create as HTML
+  Parameters: {"user"=>{"username"=>"haruki", "password"=>"[FILTERED]"}, "session"=>{"user"=>{"username"=>"haruki", "password"=>"[FILTERED]"}}}
+  [1m[36mUser Load (1.3ms)[0m  [1m[34mSELECT `users`.* FROM `users` WHERE `users`.`username` = 'haruki' ORDER BY `users`.`id` ASC LIMIT 1[0m
+Redirected to http://localhost:3001/
+Completed 303 See Other in 351ms (ActiveRecord: 45.2ms | Allocations: 13566)
+
+
+Started GET "/" for ::1 at 2024-11-10 14:37:12 +0900
+Processing by Rails::WelcomeController#index as HTML
+  Parameters: {"welcome"=>{}}
+  Rendering /Users/koume/.rbenv/versions/3.2.0/lib/ruby/gems/3.2.0/gems/railties-7.0.8.6/lib/rails/templates/rails/welcome/index.html.erb
+  Rendered /Users/koume/.rbenv/versions/3.2.0/lib/ruby/gems/3.2.0/gems/railties-7.0.8.6/lib/rails/templates/rails/welcome/index.html.erb (Duration: 1.2ms | Allocations: 480)
+Completed 200 OK in 3ms (Views: 1.8ms | ActiveRecord: 0.0ms | Allocations: 1773)
+
+
+Started POST "/api/v1/records" for ::1 at 2024-11-10 14:37:21 +0900
+Processing by Api::V1::RecordsController#create as HTML
+  Parameters: {"record"=>{"user_id"=>1, "record_date"=>"2024-11-10", "temperature"=>36, "weight"=>60, "note"=>"", "is_period_start"=>true, "is_period_end"=>false, "is_discharge"=>false, "is_spotting"=>false, "is_taking_pill"=>true}}
+  [1m[36mTRANSACTION (0.7ms)[0m  [1m[35mBEGIN[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mUser Load (1.6ms)[0m  [1m[34mSELECT `users`.* FROM `users` WHERE `users`.`id` = 1 LIMIT 1[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mRecord Exists? (10.8ms)[0m  [1m[34mSELECT 1 AS one FROM `records` WHERE `records`.`record_date` = '2024-11-10' AND `records`.`user_id` = 1 LIMIT 1[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mRecord Create (23.7ms)[0m  [1m[32mINSERT INTO `records` (`user_id`, `record_date`, `temperature`, `weight`, `note`, `is_period_start`, `is_period_end`, `is_discharge`, `is_spotting`, `is_taking_pill`, `created_at`, `updated_at`) VALUES (1, '2024-11-10', 36.0, 60.0, '', TRUE, FALSE, FALSE, FALSE, TRUE, '2024-11-10 05:37:21.555699', '2024-11-10 05:37:21.555699')[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+  [1m[36mTRANSACTION (15.7ms)[0m  [1m[35mCOMMIT[0m
+  ↳ app/controllers/api/v1/records_controller.rb:19:in `create'
+Completed 201 Created in 103ms (Views: 2.7ms | ActiveRecord: 63.7ms | Allocations: 15809)
+
+

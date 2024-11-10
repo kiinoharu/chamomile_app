@@ -30,6 +30,6 @@ class Api::V1::RecordsController < ApplicationController
   end
 
   def record_params
-    params.require(:record).permit(:attribute1, :attribute2) # 適切な属性を指定してください
+    params.require(:record).permit(:user_id,:record_date, :temperature, :weight, :note, :is_period_start, :is_period_end, :is_discharge, :is_spotting, :is_taking_pill)
   end
 end

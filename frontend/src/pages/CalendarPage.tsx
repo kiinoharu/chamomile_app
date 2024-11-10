@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import helpIcon from '../images/help_icon.png';
+import axios from 'axios';
 
 const CalendarPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -92,10 +93,10 @@ const CalendarPage: React.FC = () => {
   };
 
   // 記録を保存する処理
-  const handleSaveRecord = () => {
-    alert(`日付: ${selectedDay} の記録を保存しました。\n体温: ${temperature}\n体重: ${weight}\nおりもの: ${isDischarge ? 'あり' : 'なし'}\n不正出血: ${isSpotting ? 'あり' : 'なし'}\n薬: ${isTakingPill ? '服用あり' : '服用なし'}\nメモ: ${note}`);
-    setSelectedDay(null);
-  };
+  // const handleSaveRecord = () => {
+    // alert(`日付: ${selectedDay} の記録を保存しました。\n体温: ${temperature}\n体重: ${weight}\nおりもの: ${isDischarge ? 'あり' : 'なし'}\n不正出血: ${isSpotting ? 'あり' : 'なし'}\n薬: ${isTakingPill ? '服用あり' : '服用なし'}\nメモ: ${note}`);
+  //   setSelectedDay(null);
+  // };
   
   // 年と月の変更処理
   const handleYearMonthChange = (newYear: number, newMonth: number) => {
@@ -111,6 +112,40 @@ const CalendarPage: React.FC = () => {
   const handleCloseHelpPopup = () => {
     setShowHelpPopup(false);
   };
+
+  // 記録を保存する処理
+const handleSaveRecord = async () => {
+  // 選択した日が設定されていない場合は処理を中断
+  if (!selectedDay) return;
+
+  const userId = isAuthenticated ? 1 : null;
+
+  const recordData = {
+    record: {
+      user_id: userId,
+      record_date: `${year}-${month}-${selectedDay}`,
+      temperature: temperature ? parseFloat(temperature) : null,
+      weight: weight ? parseFloat(weight) : null,
+      note: note,
+      is_period_start: isPeriodStart,
+      is_period_end: isPeriodEnd,
+      is_discharge: isDischarge,
+      is_spotting: isSpotting,
+      is_taking_pill: isTakingPill,
+    },
+  };
+
+  try {
+    // APIにPOSTリクエストを送信
+    const response = await axios.post('http://localhost:3001/api/v1/records', recordData);
+    console.log('Record saved:', response.data);
+    alert('記録が保存されました');
+    setSelectedDay(null); // 保存後にフォームを閉じる
+  } catch (error) {
+    console.error('Error saving record:', error);
+    alert('記録の保存に失敗しました');
+  }
+};
 
   return (
     <Layout>
