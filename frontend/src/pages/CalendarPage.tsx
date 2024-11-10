@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import helpIcon from '../images/help_icon.png';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 const CalendarPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
+  const navigate = useNavigate(); 
   const currentDate = new Date();
   const [year, setYear] = useState(currentDate.getFullYear());
   const [month, setMonth] = useState(currentDate.getMonth() + 1);
@@ -24,6 +25,9 @@ const CalendarPage: React.FC = () => {
   const [isYearMonthDropdownOpen, setIsYearMonthDropdownOpen] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
   const [showHelpPopup, setShowHelpPopup] = useState(false);
+  const [records, setRecords] = useState<{ [key: string]: any }>({});
+  const [showPeriodIcon, setShowPeriodIcon] = useState<boolean>(false); 
+
   const announcements = [
     {
       title: "子宮頸がん検診の頻度について",
@@ -40,7 +44,7 @@ const CalendarPage: React.FC = () => {
   ];
 
   const latestAnnouncements = announcements
-  .sort((a, b) => b.date.getTime() - a.date.getTime()) // 日付で降順ソート
+  .sort((a, b) => b.date.getTime() - a.date.getTime()) 
   .slice(0, 2); 
 
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<null | { title: string; content: string; link: string }>(null);
@@ -60,37 +64,51 @@ const CalendarPage: React.FC = () => {
   const firstDayOfMonth = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
 
+  useEffect(() => {
+    if (isPeriodStart && !isPeriodEnd) {
+      setShowPeriodIcon(true);
+    } else {
+      setShowPeriodIcon(false);
+    }
+  }, [isPeriodStart, isPeriodEnd]);
+
   // 選択された日付が特定の条件（連続する日付が7日以上）を満たすかチェック
   useEffect(() => {
-    if (selectedDates.length >= 7) {
-      const continuousDays = selectedDates.slice(-7);
-      const isContinuous = continuousDays[6] - continuousDays[0] === 6;
-
-      if (isContinuous) {
-        const alertMessage = `${announcements[1].title}\n${announcements[1].content}\n詳細はこちら: ${announcements[1].link}`;
-        alert(alertMessage);
+    const fetchRecords = async () => {
+      try {
+        const response = await axios.get('http://localhost:3001/api/v1/records');
+        const fetchedRecords = response.data.reduce((acc: any, record: any) => {
+          acc[record.record_date] = record;
+          return acc;
+        }, {});
+        setRecords(fetchedRecords);
+      } catch (error) {
+        console.error("Error fetching records:", error);
       }
-    }
-  }, [selectedDates]);
+    };
+    fetchRecords();
+  }, [month, year]);
 
   // 日付をクリックしたときの処理
   const handleDayClick = (day: number) => {
     setSelectedDay(day);
-    setTemperature('');
-    setWeight('');
-    setNote('');
-    setIsPeriodStart(false);
-    setIsPeriodEnd(false);
-    setIsDischarge(false);
-    setIsSpotting(false);
-    setIsTakingPill(false);
+    const record = records[`${year}-${month}-${day}`];
+    setTemperature(record?.temperature ?? '');
+    setWeight(record?.weight ?? '');
+    setNote(record?.note ?? '');
+    setIsPeriodStart(record?.is_period_start ?? false);
+    setIsPeriodEnd(record?.is_period_end ?? false);
+    setIsDischarge(record?.is_discharge ?? false);
+    setIsSpotting(record?.is_spotting ?? false);
+    setIsTakingPill(record?.is_taking_pill ?? false);
+  };
 
     // 連続日数のチェック用に選択した日を保存
-    setSelectedDates((prevDates) => {
-      if (!prevDates.includes(day)) return [...prevDates, day];
-      return prevDates;
-    });
-  };
+  //   setSelectedDates((prevDates) => {
+  //     if (!prevDates.includes(day)) return [...prevDates, day];
+  //     return prevDates;
+  //   });
+  // };
 
   // 記録を保存する処理
   // const handleSaveRecord = () => {
@@ -114,38 +132,90 @@ const CalendarPage: React.FC = () => {
   };
 
   // 記録を保存する処理
-const handleSaveRecord = async () => {
-  // 選択した日が設定されていない場合は処理を中断
-  if (!selectedDay) return;
 
-  const userId = isAuthenticated ? 1 : null;
+  const handleSaveRecord = async () => {
+    if (!selectedDay) return;
+  
+    // ユーザーIDを取得
+    const userId = isAuthenticated ? 1 : null;
+    if (!userId) {
+      console.error("ユーザーIDが設定されていません");
+      return;
+    }
+  
+    const recordDate = `${year}-${month}-${selectedDay}`;
+    const recordData = {
+      record: {
+        user_id: userId,
+        record_date: recordDate,
+        temperature: temperature ? parseFloat(temperature) : null,
+        weight: weight ? parseFloat(weight) : null,
+        note: note,
+        is_period_start: isPeriodStart,
+        is_period_end: isPeriodEnd,
+        is_discharge: isDischarge,
+        is_spotting: isSpotting,
+        is_taking_pill: isTakingPill,
+      },
+    };
+  
+    try {
+      // まずは同じ日付の記録があるかどうか確認
+      const response = await axios.get(`http://localhost:3001/api/v1/records?record_date=${recordDate}&user_id=${userId}`);
+  
+      if (response.data && response.data.id) {
+        // 記録がある場合は更新
+        await axios.put(`http://localhost:3001/api/v1/records/${response.data.id}`, recordData);
+      } else {
+        // 記録がない場合は新規作成
+        await axios.post('http://localhost:3001/api/v1/records', recordData);
+      }
+  
+      // 保存完了後、記録を更新
+      setRecords((prevRecords) => ({
+        ...prevRecords,
+        [recordDate]: recordData.record,
+      }));
+  
+      // 選択された日付を解除してフォームを閉じる
+      setSelectedDay(null);
+    } catch (error) {
+      const axiosError = error as AxiosError; // error を AxiosError 型にキャスト
+      if (axiosError.response && axiosError.response.status === 404) {
+        await axios.post('http://localhost:3001/api/v1/records', recordData);
+      } else {
+        console.error('Error saving record:', axiosError.response?.data || axiosError.message);
+        alert('記録の保存に失敗しました');
+        return;
+      }
+    }
+    navigate('/');
+  };
+  
+  // 🌙マークを生理期間中に表示する処理
+  const getPeriodIcon = (day: number) => {
+    const dateKey = `${year}-${month}-${day}`;
+    const record = records[dateKey];
 
-  const recordData = {
-    record: {
-      user_id: userId,
-      record_date: `${year}-${month}-${selectedDay}`,
-      temperature: temperature ? parseFloat(temperature) : null,
-      weight: weight ? parseFloat(weight) : null,
-      note: note,
-      is_period_start: isPeriodStart,
-      is_period_end: isPeriodEnd,
-      is_discharge: isDischarge,
-      is_spotting: isSpotting,
-      is_taking_pill: isTakingPill,
-    },
+    if (record && (record.is_period_start || record.is_period_end || showPeriodIcon)) {
+      return '🌙';
+    }
+    return null;
   };
 
-  try {
-    // APIにPOSTリクエストを送信
-    const response = await axios.post('http://localhost:3001/api/v1/records', recordData);
-    console.log('Record saved:', response.data);
-    alert('記録が保存されました');
-    setSelectedDay(null); // 保存後にフォームを閉じる
-  } catch (error) {
-    console.error('Error saving record:', error);
-    alert('記録の保存に失敗しました');
+const toggleIsPeriodEnd = () => {
+  setIsPeriodEnd((prev) => !prev);
+  if (!isPeriodEnd) {
+    setIsPeriodStart(false);
   }
 };
+
+
+  // 生理開始日が設定されているかチェックし、開始ボタンの表示を制御
+  const isPeriodStartDisabled = !isPeriodEnd && Object.values(records).some(
+    (record: any) => record.is_period_start
+  );
+  
 
   return (
     <Layout>
@@ -234,24 +304,39 @@ const handleSaveRecord = async () => {
             <div key={`empty-${index}`} />
           ))}
           
-          {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => (
-            <div
-              key={day}
-              onClick={() => handleDayClick(day)}
-              style={{
-                border: '1px solid #ddd',
-                backgroundColor: '#ffffff',
-                padding: '10px',
-                borderRadius: '8px',
-                textAlign: 'center',
-                cursor: 'pointer'
-              }}
-            >
-              {day}
-            </div>
-          ))}
+          {Array.from({ length: daysInMonth }, (_, i) => {
+            const day = i + 1;
+            const dateKey = `${year}-${month}-${day}`;
+            const record = records[dateKey];
+            return (
+              <div
+                key={day}
+                onClick={() => handleDayClick(day)}
+                style={{
+                  border: '1px solid #ddd',
+                  backgroundColor: '#ffffff',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  position: 'relative'
+                }}
+              >
+                {day}
+                {/* 🌙マーク表示（開始後終了までの間） */}
+                {record && (
+                  <div style={{ fontSize: '0.8em', color: '#555' }}>
+                    {record.is_discharge && '💧'}
+                    {record.is_spotting && '🩸'}
+                    {record.is_taking_pill && '💊'}
+                    {getPeriodIcon(day)}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
-
+        
         {/* 記録入力フォーム */}
         {selectedDay !== null && (
           <div style={{
@@ -366,7 +451,8 @@ const handleSaveRecord = async () => {
                 </button>
               <span style={{ fontSize: '1.5rem', marginRight: '10px' }}>🌙</span>
               <button
-                onClick={() => { setIsPeriodStart(true); setIsPeriodEnd(false); }}
+                onClick={() => setIsPeriodStart(!isPeriodStart)}
+                disabled={isPeriodEnd}
                 style={{
                   backgroundColor: isPeriodStart ? '#FF69B4' : '#ddd',
                   color: isPeriodStart ? '#FFFFFF' : '#555',
@@ -381,7 +467,7 @@ const handleSaveRecord = async () => {
               </button>
 
               <button
-                onClick={() => { setIsPeriodStart(false); setIsPeriodEnd(true); }}
+                onClick={() => setIsPeriodEnd(!isPeriodEnd)}
                 style={{
                   backgroundColor: isPeriodEnd ? '#FF69B4' : '#ddd',
                   color: isPeriodEnd ? '#FFFFFF' : '#555',
@@ -447,7 +533,7 @@ const handleSaveRecord = async () => {
         {/* ヘルプのポップアップ */}
         {showHelpPopup && (
           <div 
-          onClick={() => setShowHelpPopup(false)} // 背景クリックでポップアップを閉じる
+          onClick={() => setShowHelpPopup(false)} 
           style={{
             position: 'fixed',
             top: '0',
@@ -462,7 +548,7 @@ const handleSaveRecord = async () => {
           }}
         >
           <div 
-            onClick={(e) => e.stopPropagation()} // ポップアップの内容をクリックしても閉じないようにする
+            onClick={(e) => e.stopPropagation()} 
             style={{
               backgroundColor: '#fff',
               padding: '20px',

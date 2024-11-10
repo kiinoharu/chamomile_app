@@ -6,7 +6,11 @@ Rails.application.routes.draw do
   }
   namespace :api do
     namespace :v1 do
-      resources :records, only: [:index, :show, :create]
+      resources :records, only: [:index, :create, :show, :update] do
+        collection do
+          get 'find', to: 'records#show_by_date' # record_dateとuser_idで検索する独自のエンドポイント
+        end
+      end
     end
   end
 end
