@@ -2,27 +2,31 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import apiClient from '../api/apiClient';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const { login, guestLogin } = useAuth();
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const userData = { user: { username, password } }; 
     try {
-      const response = await apiClient.post('/login', { username, password });
+      const response = await apiClient.post('http://localhost:3001/users/sign_in', userData); 
       console.log(response.data);
+      login(); // 認証状態を更新
+      navigate('/');
     } catch (error) {
       console.error('Login error:', error);
+      alert('ログインに失敗しました。');
     }
-    e.preventDefault();
-    login();
-    alert('ログインしました');
   };
 
   const handleGuestLogin = () => {
     guestLogin();
-    alert('ゲストとしてログインしました');
+    navigate('/');
   };
 
   return (

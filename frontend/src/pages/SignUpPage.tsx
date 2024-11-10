@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 import apiClient from '../api/apiClient';
+import { useNavigate } from 'react-router-dom';
 
 const SignUpPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [cycle, setCycle] = useState<number | ''>(''); // 生理平均周期
+  const navigate = useNavigate(); 
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -17,6 +19,7 @@ const SignUpPage: React.FC = () => {
      const response = await apiClient.post('http://localhost:3001/users', userData );
      console.log('User registered:', response.data);
      alert('ユーザー登録が完了しました');
+     navigate('/');
    } catch (error) {
      console.error('Error during sign-up:', error);
      alert('登録に失敗しました。再度お試しください。');

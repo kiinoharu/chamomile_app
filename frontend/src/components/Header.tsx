@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-// import '../styles.css';
-
 
 const Header: React.FC = () => {
-  const { isAuthenticated } = useAuth(); // 認証状態の確認
+  const { isAuthenticated, logout } = useAuth(); // 認証状態とログアウト関数の取得
   const [menuOpen, setMenuOpen] = useState(false);
 
   // メニューの開閉を切り替える関数
   const toggleMenu = () => {
     setMenuOpen(!menuOpen);
+  };
+
+  // ログアウト処理
+  const handleLogout = () => {
+    logout();
+    setMenuOpen(false); // メニューを閉じる
   };
 
   return (
@@ -21,15 +25,30 @@ const Header: React.FC = () => {
         </h1>
 
         {/* ログインと新規登録リンク（未ログイン時のみ表示） */}
-        {!isAuthenticated && (
+        {!isAuthenticated ? (
           <div style={{ display: 'flex', alignItems: 'center', marginLeft: '100px' }}>
-            <Link to="/login" style={{ color: '#FFFFFF', fontSize: '0.8rem', marginRight: '5px' }}>
+            <Link to="/login" style={{ color: '#FFFFFF', fontSize: '0.8rem', marginRight: '5px' , textDecoration: 'none'}}>
               ログイン
             </Link>
-            <Link to="/signup" style={{ color: '#FFFFFF', fontSize: '0.8rem', marginRight: '5px' }}>
+            <Link to="/signup" style={{ color: '#FFFFFF', fontSize: '0.8rem', marginRight: '5px' , textDecoration: 'none'}}>
               新規登録
             </Link>
           </div>
+        ) : (
+          // ログアウトボタン（ログイン時のみ表示）
+          <button
+            onClick={handleLogout}
+            style={{
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: '#FFFFFF',
+              fontSize: '0.8rem',
+              marginLeft: '150px',
+              cursor: 'pointer'
+            }}
+          >
+            ログアウト
+          </button>
         )}
 
         {/* メニューボタン */}
@@ -51,8 +70,6 @@ const Header: React.FC = () => {
       {menuOpen && (
         <nav style={{ display: 'flex', justifyContent: 'center', marginTop: '10px' }}>
           <Link to="/" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>ホーム</Link>
-          {/* <Link to="/record" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>記録</Link>
-          <Link to="/statistics" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>統計</Link> */}
           <Link to="/announcement" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>掲示板</Link>
           <Link to="/settings" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>設定</Link>
           <Link to="/usageguide" style={{ display: 'block', margin: '10px 5px', color: '#FFFFFF' }} onClick={toggleMenu}>使い方</Link>
