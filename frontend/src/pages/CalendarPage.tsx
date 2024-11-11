@@ -72,6 +72,12 @@ const CalendarPage: React.FC = () => {
     }
   }, [isPeriodStart, isPeriodEnd]);
 
+  useEffect(() => {
+    if (isPeriodEnd) {
+      setIsPeriodStart(false);
+    }
+  }, [isPeriodEnd]);
+
   // 選択された日付が特定の条件（連続する日付が7日以上）を満たすかチェック
   useEffect(() => {
     const fetchRecords = async () => {
@@ -92,7 +98,9 @@ const CalendarPage: React.FC = () => {
   // 日付をクリックしたときの処理
   const handleDayClick = (day: number) => {
     setSelectedDay(day);
-    const record = records[`${year}-${month}-${day}`];
+    const dateKey = `${year}-${month}-${day}`;
+    const record = records[dateKey];
+
     setTemperature(record?.temperature ?? '');
     setWeight(record?.weight ?? '');
     setNote(record?.note ?? '');
@@ -103,17 +111,19 @@ const CalendarPage: React.FC = () => {
     setIsTakingPill(record?.is_taking_pill ?? false);
   };
 
+  // ボタンの制御ロジック
+  const isPeriodStartDisabled = isPeriodEnd || Object.values(records).some(
+    (record: any) => record.is_period_start
+  );
+  const isPeriodEndDisabled = !isPeriodStart || isPeriodEnd || !Object.values(records).some(
+    (record: any) => record.is_period_start
+  );
+
     // 連続日数のチェック用に選択した日を保存
   //   setSelectedDates((prevDates) => {
   //     if (!prevDates.includes(day)) return [...prevDates, day];
   //     return prevDates;
   //   });
-  // };
-
-  // 記録を保存する処理
-  // const handleSaveRecord = () => {
-    // alert(`日付: ${selectedDay} の記録を保存しました。\n体温: ${temperature}\n体重: ${weight}\nおりもの: ${isDischarge ? 'あり' : 'なし'}\n不正出血: ${isSpotting ? 'あり' : 'なし'}\n薬: ${isTakingPill ? '服用あり' : '服用なし'}\nメモ: ${note}`);
-  //   setSelectedDay(null);
   // };
   
   // 年と月の変更処理
@@ -196,12 +206,36 @@ const CalendarPage: React.FC = () => {
   const getPeriodIcon = (day: number) => {
     const dateKey = `${year}-${month}-${day}`;
     const record = records[dateKey];
-
-    if (record && (record.is_period_start || record.is_period_end || showPeriodIcon)) {
+  
+    // 開始日または終了日そのものに🌙を表示
+    if (record && (record.is_period_start || record.is_period_end)) {
       return '🌙';
     }
+  
+    // 開始日と終了日を取得し、日付順にソート
+    const startDates = Object.keys(records)
+      .filter((key) => records[key].is_period_start)
+      .sort();
+    const endDates = Object.keys(records)
+      .filter((key) => records[key].is_period_end)
+      .sort();
+  
+    if (startDates.length > 0) {
+      const lastStart = startDates[startDates.length - 1];
+      const lastEnd = endDates.length > 0 ? endDates[endDates.length - 1] : null;
+  
+      // 開始日から終了日までの間の日付に🌙を表示
+      if (lastEnd && lastStart < dateKey && dateKey < lastEnd) {
+        return '🌙';
+      } else if (!lastEnd && lastStart < dateKey) {
+        // 終了日が未設定で、開始日の後の日付に🌙を表示
+        return '🌙';
+      }
+    }
+  
     return null;
   };
+  
 
 const toggleIsPeriodEnd = () => {
   setIsPeriodEnd((prev) => !prev);
@@ -211,10 +245,10 @@ const toggleIsPeriodEnd = () => {
 };
 
 
-  // 生理開始日が設定されているかチェックし、開始ボタンの表示を制御
-  const isPeriodStartDisabled = !isPeriodEnd && Object.values(records).some(
-    (record: any) => record.is_period_start
-  );
+  // // 生理開始日が設定されているかチェックし、開始ボタンの表示を制御
+  // const isPeriodStartDisabled = !isPeriodEnd && Object.values(records).some(
+  //   (record: any) => record.is_period_start
+  // );
   
 
   return (
