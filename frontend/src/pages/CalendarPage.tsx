@@ -80,20 +80,27 @@ const CalendarPage: React.FC = () => {
 
   // 選択された日付が特定の条件（連続する日付が7日以上）を満たすかチェック
   useEffect(() => {
+    console.log("fetchRecordsを実行");
     const fetchRecords = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/v1/records');
+        console.log("取得したデータ:", response.data);
         const fetchedRecords = response.data.reduce((acc: any, record: any) => {
           acc[record.record_date] = record;
           return acc;
         }, {});
         setRecords(fetchedRecords);
+        console.log("records state 更新:", fetchedRecords);
       } catch (error) {
         console.error("Error fetching records:", error);
       }
     };
     fetchRecords();
   }, [month, year]);
+
+  useEffect(() => {
+    console.log("レンダリングチェック:", records); // recordsが更新されるたびにログが表示されるか確認
+  }, [records]);
 
   // 日付をクリックしたときの処理
   const handleDayClick = (day: number) => {
@@ -206,35 +213,49 @@ const CalendarPage: React.FC = () => {
   const getPeriodIcon = (day: number) => {
     const dateKey = `${year}-${month}-${day}`;
     const record = records[dateKey];
-  
-    // 開始日または終了日そのものに🌙を表示
+    console.log(`チェック対象の日付: ${dateKey}`, record); // 日付とそのデータをログ出力
+
+    // 開始・終了日そのものに🌙を表示
     if (record && (record.is_period_start || record.is_period_end)) {
-      return '🌙';
+        console.log(`🌙マーク表示: 開始・終了日 ${dateKey}`);
+        return '🌙';
     }
-  
-    // 開始日と終了日を取得し、日付順にソート
+
+    // 開始日と終了日の間の日付に🌙を表示
     const startDates = Object.keys(records)
-      .filter((key) => records[key].is_period_start)
-      .sort();
+        .filter((key) => records[key].is_period_start)
+        .sort();
     const endDates = Object.keys(records)
-      .filter((key) => records[key].is_period_end)
-      .sort();
-  
+        .filter((key) => records[key].is_period_end)
+        .sort();
+
+    console.log("開始日一覧:", startDates, "終了日一覧:", endDates); // 開始・終了日のリストを出力
+
     if (startDates.length > 0) {
-      const lastStart = startDates[startDates.length - 1];
-      const lastEnd = endDates.length > 0 ? endDates[endDates.length - 1] : null;
-  
-      // 開始日から終了日までの間の日付に🌙を表示
-      if (lastEnd && lastStart < dateKey && dateKey < lastEnd) {
-        return '🌙';
-      } else if (!lastEnd && lastStart < dateKey) {
-        // 終了日が未設定で、開始日の後の日付に🌙を表示
-        return '🌙';
-      }
+        const lastStart = startDates[startDates.length - 1];
+        const lastEnd = endDates.find((end) => end > lastStart) || null;
+
+        console.log(`最後の開始日: ${lastStart}`, lastEnd ? `最後の終了日: ${lastEnd}` : "終了日なし");
+
+        // 開始日以降で終了日が存在しない場合、記録のある日付にのみ🌙を表示
+        if (lastEnd === null) {
+            if (lastStart < dateKey && record) {
+                console.log(`🌙マーク表示: 開始日以降の記録日 ${dateKey}`);
+                return '🌙';
+            }
+        } else {
+            // 開始日から終了日までの期間に🌙を表示
+            if (lastStart < dateKey && dateKey < lastEnd) {
+                console.log(`🌙マーク表示: 期間内 ${dateKey}`);
+                return '🌙';
+            }
+        }
     }
-  
+
     return null;
-  };
+};
+
+  
   
 
 const toggleIsPeriodEnd = () => {
