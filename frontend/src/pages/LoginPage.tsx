@@ -1,19 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
+import apiClient from '../api/apiClient';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage: React.FC = () => {
   const { login, guestLogin } = useAuth();
+  const navigate = useNavigate();
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    login();
-    alert('ログインしました');
+    const userData = { user: { username, password } }; 
+    try {
+      const response = await apiClient.post('http://localhost:3001/users/sign_in', userData); 
+      console.log(response.data);
+      login(); // 認証状態を更新
+      navigate('/');
+    } catch (error) {
+      console.error('Login error:', error);
+      alert('ログインに失敗しました。');
+    }
   };
 
   const handleGuestLogin = () => {
     guestLogin();
-    alert('ゲストとしてログインしました');
+    navigate('/');
   };
 
   return (
@@ -25,6 +38,8 @@ const LoginPage: React.FC = () => {
             <input 
               type="text" 
               placeholder="ユーザー名" 
+              value={username} 
+              onChange={(e) => setUsername(e.target.value)}
               style={{
                 padding: '10px',
                 margin: '10px 0',
@@ -36,6 +51,8 @@ const LoginPage: React.FC = () => {
             <input 
               type="password" 
               placeholder="パスワード" 
+              value={password} 
+              onChange={(e) => setPassword(e.target.value)}
               style={{
                 padding: '10px',
                 margin: '10px 0',
@@ -46,6 +63,7 @@ const LoginPage: React.FC = () => {
             />
             <button 
               type="submit" 
+              onClick={handleLogin}
               style={{
                 padding: '10px',
                 marginTop: '20px',

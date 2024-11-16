@@ -1,8 +1,16 @@
 Rails.application.routes.draw do
-  devise_for :users
+  get 'records/index'
+  get 'records/create'
+  devise_for :users, controllers: {
+    registrations: 'users/registrations'
+  }
   namespace :api do
     namespace :v1 do
-      get 'ping', to: 'test#ping'
+      resources :records, only: [:index, :create, :show, :update] do
+        collection do
+          get 'find', to: 'records#show_by_date' # record_dateとuser_idで検索する独自のエンドポイント
+        end
+      end
     end
   end
 end
