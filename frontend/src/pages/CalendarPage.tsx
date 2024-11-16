@@ -271,7 +271,7 @@ return (
       {day}
       {/* レコードに基づいて追加の情報を表示 */}
       {record && (
-        <div style={{ fontSize: '0.8em', color: '#555', marginTop: '5px' }}>
+        <div style={{ fontSize: '0.3em', color: '#555', marginTop: '5px' }}>
           {/* {record.is_period_start && '🌙'}
           {record.is_period_end && '🌙'} */}
           {record.is_discharge && '💧'}
