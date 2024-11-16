@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -64,42 +64,42 @@ const CalendarPage: React.FC = () => {
   const firstDayOfMonth = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
 
+  // 下記の構造について、トリガーの変数が読み込まれたり、値が書き換わった場合に処理が走る
+  // useEffect(()=>{処理を記述},[トリガーになる変数を記述])
   useEffect(() => {
-    if (isPeriodStart && !isPeriodEnd) {
+    if (isPeriodStart || isPeriodEnd) {
       setShowPeriodIcon(true);
+      if (isPeriodEnd) {
+        setIsPeriodStart(false);
+      }
     } else {
       setShowPeriodIcon(false);
     }
   }, [isPeriodStart, isPeriodEnd]);
-
-  useEffect(() => {
-    if (isPeriodEnd) {
-      setIsPeriodStart(false);
-    }
-  }, [isPeriodEnd]);
+  
 
   // 選択された日付が特定の条件（連続する日付が7日以上）を満たすかチェック
   useEffect(() => {
-    console.log("fetchRecordsを実行");
     const fetchRecords = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/v1/records');
-        console.log("取得したデータ:", response.data);
         const fetchedRecords = response.data.reduce((acc: any, record: any) => {
           acc[record.record_date] = record;
           return acc;
         }, {});
         setRecords(fetchedRecords);
-        console.log("records state 更新:", fetchedRecords);
       } catch (error) {
-        console.error("Error fetching records:", error);
+        console.error('Error fetching records:', error);
       }
     };
+  
     fetchRecords();
-  }, [month, year]);
+  }, []);
 
   useEffect(() => {
-    console.log("レンダリングチェック:", records); // recordsが更新されるたびにログが表示されるか確認
+    if (Object.keys(records).length > 0) {
+      console.log("Records updated:", records);
+    }
   }, [records]);
 
   // 日付をクリックしたときの処理
@@ -208,53 +208,36 @@ const CalendarPage: React.FC = () => {
     }
     navigate('/');
   };
-  
+
   // 🌙マークを生理期間中に表示する処理
   const getPeriodIcon = (day: number) => {
     const dateKey = `${year}-${month}-${day}`;
     const record = records[dateKey];
-    console.log(`チェック対象の日付: ${dateKey}`, record); // 日付とそのデータをログ出力
-
-    // 開始・終了日そのものに🌙を表示
+    
+  
     if (record && (record.is_period_start || record.is_period_end)) {
-        console.log(`🌙マーク表示: 開始・終了日 ${dateKey}`);
-        return '🌙';
+      return '🌙';
     }
-
-    // 開始日と終了日の間の日付に🌙を表示
+  
     const startDates = Object.keys(records)
-        .filter((key) => records[key].is_period_start)
-        .sort();
+      .filter((key) => records[key].is_period_start)
+      .sort();
     const endDates = Object.keys(records)
-        .filter((key) => records[key].is_period_end)
-        .sort();
-
-    console.log("開始日一覧:", startDates, "終了日一覧:", endDates); // 開始・終了日のリストを出力
-
+      .filter((key) => records[key].is_period_end)
+      .sort();
+  
     if (startDates.length > 0) {
-        const lastStart = startDates[startDates.length - 1];
-        const lastEnd = endDates.find((end) => end > lastStart) || null;
-
-        console.log(`最後の開始日: ${lastStart}`, lastEnd ? `最後の終了日: ${lastEnd}` : "終了日なし");
-
-        // 開始日以降で終了日が存在しない場合、記録のある日付にのみ🌙を表示
-        if (lastEnd === null) {
-            if (lastStart < dateKey && record) {
-                console.log(`🌙マーク表示: 開始日以降の記録日 ${dateKey}`);
-                return '🌙';
-            }
-        } else {
-            // 開始日から終了日までの期間に🌙を表示
-            if (lastStart < dateKey && dateKey < lastEnd) {
-                console.log(`🌙マーク表示: 期間内 ${dateKey}`);
-                return '🌙';
-            }
-        }
+      const lastStart = startDates[startDates.length - 1];
+      const lastEnd = endDates.length > 0 ? endDates[endDates.length - 1] : null;
+  
+      if (lastStart < dateKey && (!lastEnd || dateKey < lastEnd)) {
+        return '🌙';
+      }
     }
-
+  
     return null;
-};
-
+  };
+  
   
   
 
@@ -265,15 +248,45 @@ const toggleIsPeriodEnd = () => {
   }
 };
 
-
-  // // 生理開始日が設定されているかチェックし、開始ボタンの表示を制御
-  // const isPeriodStartDisabled = !isPeriodEnd && Object.values(records).some(
-  //   (record: any) => record.is_period_start
-  // );
-  
+const calendarDays = useMemo(() => {
+  const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
+  return days.map((day) => {
+    const dateKey = `${year}-${month}-${day}`;
+    const record = records[dateKey];
+return (
+    <div
+      key={day}
+      className="calendar-day"
+      style={{
+        border: '1px solid #ddd',
+        backgroundColor: selectedDay === day ? '#FFE4E1' : '#ffffff',
+        padding: '10px',
+        borderRadius: '8px',
+        textAlign: 'center',
+        cursor: 'pointer',
+        position: 'relative',
+      }}
+      onClick={() => handleDayClick(day)} // 日付をクリックしたときのイベント
+    >
+      {day}
+      {/* レコードに基づいて追加の情報を表示 */}
+      {record && (
+        <div style={{ fontSize: '0.8em', color: '#555', marginTop: '5px' }}>
+          {/* {record.is_period_start && '🌙'}
+          {record.is_period_end && '🌙'} */}
+          {record.is_discharge && '💧'}
+          {record.is_spotting && '🩸'}
+          {record.is_taking_pill && '💊'}
+          {getPeriodIcon(day)}
+        </div>
+      )}
+    </div>
+  );
+});}, [year, month, daysInMonth, records]);
 
   return (
     <Layout>
+      {/* <div className="calendar">{renderCalendar()}</div> */}
       <div style={{ backgroundColor: '#f5f5f5', padding: '20px' }}>
         <h1 
           style={{ color: '#FF69B4', textAlign: 'center', cursor: 'pointer' }}
@@ -352,44 +365,14 @@ const toggleIsPeriodEnd = () => {
           display: 'grid',
           gridTemplateColumns: 'repeat(7, 1fr)',
           gap: '5px',
-          marginTop: '5px'
+          marginTop: '5px',
         }}>
           {/* 空白のセルを追加して、月の最初の日の位置を調整 */}
           {Array.from({ length: firstDayOfMonth }).map((_, index) => (
             <div key={`empty-${index}`} />
           ))}
           
-          {Array.from({ length: daysInMonth }, (_, i) => {
-            const day = i + 1;
-            const dateKey = `${year}-${month}-${day}`;
-            const record = records[dateKey];
-            return (
-              <div
-                key={day}
-                onClick={() => handleDayClick(day)}
-                style={{
-                  border: '1px solid #ddd',
-                  backgroundColor: '#ffffff',
-                  padding: '10px',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  position: 'relative'
-                }}
-              >
-                {day}
-                {/* 🌙マーク表示（開始後終了までの間） */}
-                {record && (
-                  <div style={{ fontSize: '0.8em', color: '#555' }}>
-                    {record.is_discharge && '💧'}
-                    {record.is_spotting && '🩸'}
-                    {record.is_taking_pill && '💊'}
-                    {getPeriodIcon(day)}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {calendarDays}
         </div>
         
         {/* 記録入力フォーム */}
