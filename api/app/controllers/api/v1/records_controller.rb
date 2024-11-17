@@ -2,21 +2,8 @@ class Api::V1::RecordsController < ApplicationController
   before_action :set_record, only: [:show, :update, :destroy]
 
   def index
-    # user_idをパラメータから取得
-    user_id = params[:user_id]
-
-    # データを取得
-    if user_id.present?
-      records = Record.where(user_id: user_id) # user_idで絞り込み
-    else
-      records = Record.all # user_idがない場合は全件取得
-    end
-
-    # デバッグ用ログ
-    logger.debug "Fetched records: #{records.inspect}"
-
-    # JSONでレスポンスを返す
-    render json: records
+    @records = Record.all
+    render json: @records
   end
 
   # GET /api/v1/records/:id
@@ -24,17 +11,17 @@ class Api::V1::RecordsController < ApplicationController
     render json: @record
   end
 
-  def create
-    record = Record.new(record_params)
-    Rails.logger.info "Before Save: #{record.inspect}" # 保存前のログ
+  # def create
+  #   record = Record.new(record_params)
+  #   Rails.logger.info "Before Save: #{record.inspect}" # 保存前のログ
   
-    if record.save
-      Rails.logger.info "After Save: #{record.inspect}" # 保存後のログ
-      render json: { message: 'Record created successfully', record: record }, status: :created
-    else
-      render json: { errors: record.errors.full_messages }, status: :unprocessable_entity
-    end
-  end
+  #   if record.save
+  #     Rails.logger.info "After Save: #{record.inspect}" # 保存後のログ
+  #     render json: { message: 'Record created successfully', record: record }, status: :created
+  #   else
+  #     render json: { errors: record.errors.full_messages }, status: :unprocessable_entity
+  #   end
+  # end
 
   def create_or_update
     # レコードの存在確認
