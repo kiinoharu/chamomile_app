@@ -7,11 +7,17 @@ class Record < ApplicationRecord
   validates :note, length: { maximum: 500 }, allow_blank: true
   validate  :period_start_and_end_cannot_be_true
 
+  before_save :format_record_date
+
   private
 
   def period_start_and_end_cannot_be_true
     if is_period_start && is_period_end
       errors.add(:base, "生理の開始と終了は同時に選択できません")
     end
+  end
+
+  def format_record_date
+    self.record_date = record_date.to_date.strftime('%Y-%m-%d') if record_date.present?
   end
 end

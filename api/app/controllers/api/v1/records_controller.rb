@@ -1,7 +1,6 @@
 class Api::V1::RecordsController < ApplicationController
   before_action :set_record, only: [:show, :update, :destroy]
 
-  # GET /api/v1/records
   def index
     @records = Record.all
     render json: @records
@@ -12,23 +11,37 @@ class Api::V1::RecordsController < ApplicationController
     render json: @record
   end
 
-  # POST /api/v1/records
-  def create
-    @record = Record.find_or_initialize_by(user_id: record_params[:user_id], record_date: record_params[:record_date])
-    
-    if @record.update(record_params)
-      render json: @record, status: :ok
-    else
-      render json: { errors: @record.errors.full_messages }, status: :unprocessable_entity
-    end
-  end
+  # def create
+  #   record = Record.new(record_params)
+  #   Rails.logger.info "Before Save: #{record.inspect}" # 保存前のログ
+  
+  #   if record.save
+  #     Rails.logger.info "After Save: #{record.inspect}" # 保存後のログ
+  #     render json: { message: 'Record created successfully', record: record }, status: :created
+  #   else
+  #     render json: { errors: record.errors.full_messages }, status: :unprocessable_entity
+  #   end
+  # end
 
-  def update
-    @record = Record.find_by(user_id: params[:user_id], record_date: params[:record_date])
-    if @record.update(record_params)
-      render json: { message: 'Record updated successfully', record: @record }, status: :ok
+  def create_or_update
+    # レコードの存在確認
+    record = Record.find_by(user_id: record_params[:user_id], record_date: record_params[:record_date])
+
+    if record
+      # レコードが存在する場合は更新
+      if record.update(record_params)
+        render json: { message: 'Record updated successfully', record: record }, status: :ok
+      else
+        render json: { errors: record.errors.full_messages }, status: :unprocessable_entity
+      end
     else
-      render json: { errors: @record.errors.full_messages }, status: :unprocessable_entity
+      # レコードが存在しない場合は新規作成
+      new_record = Record.new(record_params)
+      if new_record.save
+        render json: { message: 'Record created successfully', record: new_record }, status: :created
+      else
+        render json: { errors: new_record.errors.full_messages }, status: :unprocessable_entity
+      end
     end
   end
 
@@ -51,7 +64,7 @@ class Api::V1::RecordsController < ApplicationController
       render json: { error: "Record date or user ID is missing" }, status: :unprocessable_entity
     end  end
 
-  def record_params
-    params.require(:record).permit(:user_id,:record_date, :temperature, :weight, :note, :is_period_start, :is_period_end, :is_discharge, :is_spotting, :is_taking_pill)
-  end
+    def record_params
+      params.require(:record).permit(:user_id, :record_date, :temperature, :weight, :note, :is_period_start, :is_period_end, :is_discharge, :is_spotting, :is_taking_pill)
+    end
 end

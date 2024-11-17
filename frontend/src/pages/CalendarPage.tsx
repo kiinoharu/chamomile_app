@@ -64,6 +64,25 @@ const CalendarPage: React.FC = () => {
   const firstDayOfMonth = new Date(year, month - 1, 1).getDay();
   const daysInMonth = new Date(year, month, 0).getDate();
 
+  const fetchRecords = async () => {
+    try {
+      const response = await axios.get('http://localhost:3001/api/v1/records');
+      console.log("Fetched raw data from API:", response.data); // APIレスポンスをログに出力
+      const fetchedRecords = response.data.reduce((acc: any, record: any) => {
+        const formattedDate = new Date(record.record_date).toISOString().split('T')[0]; // YYYY-MM-DD形式に変換
+        acc[formattedDate] = record;
+        return acc;
+      }, {});
+
+      // デバッグログ
+      console.log("Formatted records:", fetchedRecords);
+
+      setRecords(fetchedRecords);
+    } catch (error) {
+      console.error('Error fetching records:', error);
+    }
+  };
+
   // 下記の構造について、トリガーの変数が読み込まれたり、値が書き換わった場合に処理が走る
   // useEffect(()=>{処理を記述},[トリガーになる変数を記述])
   useEffect(() => {
@@ -78,21 +97,7 @@ const CalendarPage: React.FC = () => {
   }, [isPeriodStart, isPeriodEnd]);
   
 
-  // 選択された日付が特定の条件（連続する日付が7日以上）を満たすかチェック
   useEffect(() => {
-    const fetchRecords = async () => {
-      try {
-        const response = await axios.get('http://localhost:3001/api/v1/records');
-        const fetchedRecords = response.data.reduce((acc: any, record: any) => {
-          acc[record.record_date] = record;
-          return acc;
-        }, {});
-        setRecords(fetchedRecords);
-      } catch (error) {
-        console.error('Error fetching records:', error);
-      }
-    };
-  
     fetchRecords();
   }, []);
 
@@ -101,6 +106,29 @@ const CalendarPage: React.FC = () => {
       console.log("Records updated:", records);
     }
   }, [records]);
+
+  useEffect(() => {
+    const validatePeriodDates = () => {
+      const startDates = Object.keys(records)
+        .filter((key) => records[key]?.is_period_start)
+        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+      const endDates = Object.keys(records)
+        .filter((key) => records[key]?.is_period_end)
+        .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
+  
+      if (startDates.length > 0 && endDates.length > 0) {
+        const lastStart = new Date(startDates[startDates.length - 1]);
+        const lastEnd = new Date(endDates[endDates.length - 1]);
+  
+        if (lastStart > lastEnd) {
+          console.error("生理開始日が終了日より後になっています。データを確認してください。");
+        }
+      }
+    };
+  
+    validatePeriodDates();
+  }, [records]);
+  
 
   // 日付をクリックしたときの処理
   const handleDayClick = (day: number) => {
@@ -119,19 +147,70 @@ const CalendarPage: React.FC = () => {
   };
 
   // ボタンの制御ロジック
-  const isPeriodStartDisabled = isPeriodEnd || Object.values(records).some(
-    (record: any) => record.is_period_start
-  );
-  const isPeriodEndDisabled = !isPeriodStart || isPeriodEnd || !Object.values(records).some(
-    (record: any) => record.is_period_start
-  );
+  const isPeriodStartDisabled = useMemo(() => {
+    const startDates = Object.keys(records).filter(
+      (key) => records[key]?.is_period_start
+    );
+    const endDates = Object.keys(records).filter(
+      (key) => records[key]?.is_period_end
+    );
+  
+    const currentDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${selectedDay?.toString().padStart(2, '0')}`);
 
-    // 連続日数のチェック用に選択した日を保存
-  //   setSelectedDates((prevDates) => {
-  //     if (!prevDates.includes(day)) return [...prevDates, day];
-  //     return prevDates;
-  //   });
-  // };
+    for (let i = 0; i < startDates.length; i++) {
+      const start = new Date(startDates[i]);
+      const end = endDates[i] ? new Date(endDates[i]) : null;
+  
+      if (start <= currentDate && (!end || currentDate <= end)) {
+        return true; // 生理期間中なので無効
+      }
+    }
+  
+    // 1. 終了日が保存されている場合、開始ボタンは有効
+    if (endDates.length > 0) {
+      const lastEndDate = new Date(endDates[endDates.length - 1]);
+      if (currentDate > lastEndDate) {
+        return false; // 開始ボタンを有効
+      }
+    }
+  
+    // 2. レコードが存在しない場合、開始ボタンを有効
+    const dateKey = `${year}-${month.toString().padStart(2, '0')}-${selectedDay?.toString().padStart(2, '0')}`;
+    if (!records[dateKey]) {
+      return false; // 開始ボタンを有効
+    }
+  
+    return true; // 上記条件以外では無効
+  }, [records, selectedDay, year, month]);
+      
+  const isPeriodEndDisabled = useMemo(() => {
+    const startDates = Object.keys(records).filter(
+      (key) => records[key]?.is_period_start
+    );
+    const endDates = Object.keys(records).filter(
+      (key) => records[key]?.is_period_end
+    );
+  
+    const currentDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${selectedDay?.toString().padStart(2, '0')}`);
+  
+    // 1. 開始日が保存されていない場合は無効
+    if (startDates.length === 0) {
+      return true; // 無効
+    }
+  
+    // 2. 生理期間中であるか確認
+    for (let i = 0; i < startDates.length; i++) {
+      const start = new Date(startDates[i]);
+      const end = endDates[i] ? new Date(endDates[i]) : null;
+  
+      if (start <= currentDate && (!end || currentDate <= end)) {
+        return false; // 生理期間中なので有効
+      }
+    }
+  
+    return true; // 生理期間外なので無効
+  }, [records, selectedDay, year, month]);
+  
   
   // 年と月の変更処理
   const handleYearMonthChange = (newYear: number, newMonth: number) => {
@@ -160,7 +239,7 @@ const CalendarPage: React.FC = () => {
       return;
     }
   
-    const recordDate = `${year}-${month}-${selectedDay}`;
+    const recordDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
     const recordData = {
       record: {
         user_id: userId,
@@ -185,7 +264,8 @@ const CalendarPage: React.FC = () => {
         await axios.put(`http://localhost:3001/api/v1/records/${response.data.id}`, recordData);
       } else {
         // 記録がない場合は新規作成
-        await axios.post('http://localhost:3001/api/v1/records', recordData);
+        await axios.post('http://localhost:3001/api/v1/records/create_or_update', recordData);
+        console.log("Record saved:", response.data);
       }
   
       // 保存完了後、記録を更新
@@ -193,6 +273,8 @@ const CalendarPage: React.FC = () => {
         ...prevRecords,
         [recordDate]: recordData.record,
       }));
+
+      await fetchRecords();
   
       // 選択された日付を解除してフォームを閉じる
       setSelectedDay(null);
@@ -211,33 +293,36 @@ const CalendarPage: React.FC = () => {
 
   // 🌙マークを生理期間中に表示する処理
   const getPeriodIcon = (day: number) => {
-    const dateKey = `${year}-${month}-${day}`;
-    const record = records[dateKey];
-    
-  
-    if (record && (record.is_period_start || record.is_period_end)) {
-      return '🌙';
-    }
+    const dateKey = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+    const currentDate = new Date(dateKey);
   
     const startDates = Object.keys(records)
-      .filter((key) => records[key].is_period_start)
-      .sort();
+      .filter((key) => records[key]?.is_period_start)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
     const endDates = Object.keys(records)
-      .filter((key) => records[key].is_period_end)
-      .sort();
+      .filter((key) => records[key]?.is_period_end)
+      .sort((a, b) => new Date(a).getTime() - new Date(b).getTime());
   
-    if (startDates.length > 0) {
-      const lastStart = startDates[startDates.length - 1];
-      const lastEnd = endDates.length > 0 ? endDates[endDates.length - 1] : null;
+    console.log("Start dates:", startDates);
+    console.log("End dates:", endDates);
   
-      if (lastStart < dateKey && (!lastEnd || dateKey < lastEnd)) {
-        return '🌙';
+    // 各生理期間のペアを確認
+    for (let i = 0; i < startDates.length; i++) {
+      const start = new Date(startDates[i]);
+      const end = endDates[i] ? new Date(endDates[i]) : null;
+  
+      console.log(`Checking period: start=${start}, end=${end}`);
+  
+      if (start <= currentDate && (!end || currentDate <= end)) {
+        console.log(`🌙 Period icon displayed for ${dateKey} (in period: ${start} - ${end})`);
+        return '🌙'; // 生理期間中
       }
     }
   
+    console.log(`${dateKey} is not in any period range.`);
     return null;
   };
-  
+        
   
   
 
@@ -251,9 +336,15 @@ const toggleIsPeriodEnd = () => {
 const calendarDays = useMemo(() => {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   return days.map((day) => {
-    const dateKey = `${year}-${month}-${day}`;
+    const dateKey = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     const record = records[dateKey];
-return (
+
+    // デバッグログ
+    console.log("Day being rendered:", day);
+    console.log("Date key:", dateKey);
+    console.log("Record for the day:", record);
+    
+  return (
     <div
       key={day}
       className="calendar-day"
@@ -271,7 +362,7 @@ return (
       {day}
       {/* レコードに基づいて追加の情報を表示 */}
       {record && (
-        <div style={{ fontSize: '0.8em', color: '#555', marginTop: '5px' }}>
+        <div style={{ fontSize: '0.3em', color: '#555', marginTop: '5px' }}>
           {/* {record.is_period_start && '🌙'}
           {record.is_period_end && '🌙'} */}
           {record.is_discharge && '💧'}
@@ -490,7 +581,7 @@ return (
               <span style={{ fontSize: '1.5rem', marginRight: '10px' }}>🌙</span>
               <button
                 onClick={() => setIsPeriodStart(!isPeriodStart)}
-                disabled={isPeriodEnd}
+                disabled={!!isPeriodStartDisabled}
                 style={{
                   backgroundColor: isPeriodStart ? '#FF69B4' : '#ddd',
                   color: isPeriodStart ? '#FFFFFF' : '#555',
@@ -506,6 +597,7 @@ return (
 
               <button
                 onClick={() => setIsPeriodEnd(!isPeriodEnd)}
+                disabled={!!isPeriodEndDisabled}
                 style={{
                   backgroundColor: isPeriodEnd ? '#FF69B4' : '#ddd',
                   color: isPeriodEnd ? '#FFFFFF' : '#555',
