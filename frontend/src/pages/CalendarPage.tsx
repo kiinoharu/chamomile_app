@@ -147,19 +147,70 @@ const CalendarPage: React.FC = () => {
   };
 
   // ボタンの制御ロジック
-  const isPeriodStartDisabled = isPeriodEnd || Object.values(records).some(
-    (record: any) => record.is_period_start
-  );
-  const isPeriodEndDisabled = !isPeriodStart || isPeriodEnd || !Object.values(records).some(
-    (record: any) => record.is_period_start
-  );
+  const isPeriodStartDisabled = useMemo(() => {
+    const startDates = Object.keys(records).filter(
+      (key) => records[key]?.is_period_start
+    );
+    const endDates = Object.keys(records).filter(
+      (key) => records[key]?.is_period_end
+    );
+  
+    const currentDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${selectedDay?.toString().padStart(2, '0')}`);
 
-    // 連続日数のチェック用に選択した日を保存
-  //   setSelectedDates((prevDates) => {
-  //     if (!prevDates.includes(day)) return [...prevDates, day];
-  //     return prevDates;
-  //   });
-  // };
+    for (let i = 0; i < startDates.length; i++) {
+      const start = new Date(startDates[i]);
+      const end = endDates[i] ? new Date(endDates[i]) : null;
+  
+      if (start <= currentDate && (!end || currentDate <= end)) {
+        return true; // 生理期間中なので無効
+      }
+    }
+  
+    // 1. 終了日が保存されている場合、開始ボタンは有効
+    if (endDates.length > 0) {
+      const lastEndDate = new Date(endDates[endDates.length - 1]);
+      if (currentDate > lastEndDate) {
+        return false; // 開始ボタンを有効
+      }
+    }
+  
+    // 2. レコードが存在しない場合、開始ボタンを有効
+    const dateKey = `${year}-${month.toString().padStart(2, '0')}-${selectedDay?.toString().padStart(2, '0')}`;
+    if (!records[dateKey]) {
+      return false; // 開始ボタンを有効
+    }
+  
+    return true; // 上記条件以外では無効
+  }, [records, selectedDay, year, month]);
+      
+  const isPeriodEndDisabled = useMemo(() => {
+    const startDates = Object.keys(records).filter(
+      (key) => records[key]?.is_period_start
+    );
+    const endDates = Object.keys(records).filter(
+      (key) => records[key]?.is_period_end
+    );
+  
+    const currentDate = new Date(`${year}-${month.toString().padStart(2, '0')}-${selectedDay?.toString().padStart(2, '0')}`);
+  
+    // 1. 開始日が保存されていない場合は無効
+    if (startDates.length === 0) {
+      return true; // 無効
+    }
+  
+    // 2. 生理期間中であるか確認
+    for (let i = 0; i < startDates.length; i++) {
+      const start = new Date(startDates[i]);
+      const end = endDates[i] ? new Date(endDates[i]) : null;
+  
+      if (start <= currentDate && (!end || currentDate <= end)) {
+        return false; // 生理期間中なので有効
+      }
+    }
+  
+    return true; // 生理期間外なので無効
+  }, [records, selectedDay, year, month]);
+  
   
   // 年と月の変更処理
   const handleYearMonthChange = (newYear: number, newMonth: number) => {
@@ -530,7 +581,7 @@ const calendarDays = useMemo(() => {
               <span style={{ fontSize: '1.5rem', marginRight: '10px' }}>🌙</span>
               <button
                 onClick={() => setIsPeriodStart(!isPeriodStart)}
-                disabled={isPeriodEnd}
+                disabled={!!isPeriodStartDisabled}
                 style={{
                   backgroundColor: isPeriodStart ? '#FF69B4' : '#ddd',
                   color: isPeriodStart ? '#FFFFFF' : '#555',
@@ -546,6 +597,7 @@ const calendarDays = useMemo(() => {
 
               <button
                 onClick={() => setIsPeriodEnd(!isPeriodEnd)}
+                disabled={!!isPeriodEndDisabled}
                 style={{
                   backgroundColor: isPeriodEnd ? '#FF69B4' : '#ddd',
                   color: isPeriodEnd ? '#FFFFFF' : '#555',
