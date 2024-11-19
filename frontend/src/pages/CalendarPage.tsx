@@ -133,18 +133,35 @@ const CalendarPage: React.FC = () => {
   // 日付をクリックしたときの処理
   const handleDayClick = (day: number) => {
     setSelectedDay(day);
-    const dateKey = `${year}-${month}-${day}`;
+  
+    // 日付をキーにするフォーマットをfetchRecordsと統一
+    const dateKey = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     const record = records[dateKey];
-
-    setTemperature(record?.temperature ?? '');
-    setWeight(record?.weight ?? '');
-    setNote(record?.note ?? '');
-    setIsPeriodStart(record?.is_period_start ?? false);
-    setIsPeriodEnd(record?.is_period_end ?? false);
-    setIsDischarge(record?.is_discharge ?? false);
-    setIsSpotting(record?.is_spotting ?? false);
-    setIsTakingPill(record?.is_taking_pill ?? false);
+  
+    if (record) {
+      // データが存在する場合、フォームの状態を更新
+      setTemperature(record.temperature || '');
+      setWeight(record.weight || '');
+      setIsPeriodStart(record.is_period_start || false);
+      setIsPeriodEnd(record.is_period_end || false);
+      setIsDischarge(record.is_discharge || false);
+      setIsSpotting(record.is_spotting || false);
+      setIsTakingPill(record.is_taking_pill || false);
+      setNote(record.note || '');
+    } else {
+      // データが存在しない場合のデフォルト値
+      console.warn(`Record not found for date: ${dateKey}`);
+      setTemperature('');
+      setWeight('');
+      setIsPeriodStart(false);
+      setIsPeriodEnd(false);
+      setIsDischarge(false);
+      setIsSpotting(false);
+      setIsTakingPill(false);
+      setNote('');
+    }
   };
+  
 
   // ボタンの制御ロジック
   const isPeriodStartDisabled = useMemo(() => {
