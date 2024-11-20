@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import Layout from '../components/Layout';
 
-const AnnouncementPage: React.FC = () => {
+type AnnouncementProps = {
+  message: string;
+};
+
+const AnnouncementPage: React.FC<AnnouncementProps> = ({ message }) => {
   const [selectedAnnouncement, setSelectedAnnouncement] = useState<string | null>(null);
 
   const announcements = [

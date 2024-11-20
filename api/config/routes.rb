@@ -12,6 +12,7 @@ Rails.application.routes.draw do
           post :create_or_update # POST /api/v1/records/create_or_update
         end
       end
+      resources :announcements, only: [:index]
     end
   end
 end

@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import helpIcon from '../images/help_icon.png';
+import AnnouncementPage from './AnnouncementPage';
 import axios, { AxiosError } from 'axios';
 
 const CalendarPage: React.FC = () => {
@@ -26,7 +27,11 @@ const CalendarPage: React.FC = () => {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
   const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [records, setRecords] = useState<{ [key: string]: any }>({});
-  const [showPeriodIcon, setShowPeriodIcon] = useState<boolean>(false); 
+  const [showPeriodIcon, setShowPeriodIcon] = useState<boolean>(false);
+  const [announcement, setAnnouncement] = useState<{
+    title: string;
+    message: string;
+  } | null>(null);
 
   const announcements = [
     {
@@ -82,6 +87,24 @@ const CalendarPage: React.FC = () => {
       console.error('Error fetching records:', error);
     }
   };
+
+  useEffect(() => {
+    const fetchAnnouncement = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/v1/announcements");
+        if (response.data.message) {
+          setAnnouncement({
+            title: "子宮頸がん検診の頻度について",
+            message: response.data.message,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching announcement:", error);
+      }
+    };
+
+    fetchAnnouncement();
+  }, []);
 
   // 下記の構造について、トリガーの変数が読み込まれたり、値が書き換わった場合に処理が走る
   // useEffect(()=>{処理を記述},[トリガーになる変数を記述])
@@ -851,7 +874,55 @@ const calendarDays = useMemo(() => {
             </div>
           </div>
         )}
-        </div>
+        {announcement && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              backgroundColor: 'rgba(0, 0, 0, 0.5)',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              zIndex: 1000,
+            }}
+            onClick={() => setAnnouncement(null)} // モーダル外をクリックで閉じる
+          >
+            <div
+              style={{
+                backgroundColor: '#fff',
+                padding: '20px',
+                maxWidth: '350px',
+                width: '90%',
+                borderRadius: '8px',
+                boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+                position: 'relative',
+              }}
+              onClick={(e) => e.stopPropagation()} // モーダル内のクリックを無効化
+            >
+              <h3 style={{ color: '#FF69B4', marginBottom: '10px' }}>{announcement.title}</h3>
+              <p>{announcement.message}</p>
+              <button
+                onClick={() => setAnnouncement(null)}
+                style={{
+                  position: 'absolute',
+                  top: '10px',
+                  right: '10px',
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '1.5rem',
+                  color: '#999',
+                  cursor: 'pointer',
+                }}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </Layout>
   );
 };
