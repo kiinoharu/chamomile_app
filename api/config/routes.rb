@@ -13,6 +13,7 @@ Rails.application.routes.draw do
         end
       end
       resources :announcements, only: [:index]
+      resources :users, only: [:update]
     end
   end
 end

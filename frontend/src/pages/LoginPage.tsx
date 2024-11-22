@@ -12,11 +12,13 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const userData = { user: { username, password } }; 
     try {
       const response = await apiClient.post('http://localhost:3001/users/sign_in', userData); 
       console.log(response.data);
-      login(); // 認証状態を更新
+      const { username, cycle } = response.data;
+      login({ username, cycle });
       navigate('/');
     } catch (error) {
       console.error('Login error:', error);
