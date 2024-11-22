@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import helpIcon from '../images/help_icon.png';
+import AnnouncementPage from './AnnouncementPage';
 import axios, { AxiosError } from 'axios';
 
 const CalendarPage: React.FC = () => {
@@ -26,8 +27,18 @@ const CalendarPage: React.FC = () => {
   const [isHelpModalOpen, setIsHelpModalOpen] = useState<boolean>(false);
   const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [records, setRecords] = useState<{ [key: string]: any }>({});
-  const [showPeriodIcon, setShowPeriodIcon] = useState<boolean>(false); 
-
+  const [showPeriodIcon, setShowPeriodIcon] = useState<boolean>(false);
+  const [announcement, setAnnouncement] = useState<{
+    title: string;
+    message: string;
+    link: string;
+  } | null>({
+    title: "婦人科疾患に関する一般的な情報",
+    message:
+      "生理周期に乱れがあるようです。婦人系疾患に関する情報をご提供します。必要であれば専門機関の受診を推奨します。\n\n女性の健康を保つためには、婦人科疾患の予防と早期診断が重要です。月経異常や下腹部の痛みなど、婦人科系の症状にはさまざまなサインがあります。詳細な情報については以下の医師をご覧ください。",
+    link: "https://www.aska-pharma.co.jp/mint/womanhealth/joseinobyoki/", 
+  });
+  
   const announcements = [
     {
       title: "子宮頸がん検診の頻度について",
@@ -83,6 +94,26 @@ const CalendarPage: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const fetchAnnouncement = async () => {
+      try {
+        const response = await axios.get("http://localhost:3001/api/v1/announcements");
+        if (response.data.message) {
+          setAnnouncement({
+            title: "婦人科疾患に関する一般的な情報",
+            message: response.data.message,
+            link: response.data.message,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching announcement:", error);
+      }
+    };
+  
+    fetchAnnouncement();
+  }, []);
+  
+
   // 下記の構造について、トリガーの変数が読み込まれたり、値が書き換わった場合に処理が走る
   // useEffect(()=>{処理を記述},[トリガーになる変数を記述])
   useEffect(() => {
@@ -133,18 +164,35 @@ const CalendarPage: React.FC = () => {
   // 日付をクリックしたときの処理
   const handleDayClick = (day: number) => {
     setSelectedDay(day);
-    const dateKey = `${year}-${month}-${day}`;
+  
+    // 日付をキーにするフォーマットをfetchRecordsと統一
+    const dateKey = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
     const record = records[dateKey];
-
-    setTemperature(record?.temperature ?? '');
-    setWeight(record?.weight ?? '');
-    setNote(record?.note ?? '');
-    setIsPeriodStart(record?.is_period_start ?? false);
-    setIsPeriodEnd(record?.is_period_end ?? false);
-    setIsDischarge(record?.is_discharge ?? false);
-    setIsSpotting(record?.is_spotting ?? false);
-    setIsTakingPill(record?.is_taking_pill ?? false);
+  
+    if (record) {
+      // データが存在する場合、フォームの状態を更新
+      setTemperature(record.temperature || '');
+      setWeight(record.weight || '');
+      setIsPeriodStart(record.is_period_start || false);
+      setIsPeriodEnd(record.is_period_end || false);
+      setIsDischarge(record.is_discharge || false);
+      setIsSpotting(record.is_spotting || false);
+      setIsTakingPill(record.is_taking_pill || false);
+      setNote(record.note || '');
+    } else {
+      // データが存在しない場合のデフォルト値
+      console.warn(`Record not found for date: ${dateKey}`);
+      setTemperature('');
+      setWeight('');
+      setIsPeriodStart(false);
+      setIsPeriodEnd(false);
+      setIsDischarge(false);
+      setIsSpotting(false);
+      setIsTakingPill(false);
+      setNote('');
+    }
   };
+  
 
   // ボタンの制御ロジック
   const isPeriodStartDisabled = useMemo(() => {
@@ -834,7 +882,64 @@ const calendarDays = useMemo(() => {
             </div>
           </div>
         )}
-        </div>
+        {announcement && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              backgroundColor: "rgba(0, 0, 0, 0.5)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1000,
+            }}
+            onClick={() => setAnnouncement(null)}
+          >
+            <div
+              style={{
+                backgroundColor: "#fff",
+                padding: "20px",
+                maxWidth: "350px",
+                width: "90%",
+                borderRadius: "8px",
+                boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)",
+                position: "relative",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{ color: "#FF69B4", marginBottom: "10px" }}>
+                {announcement.title}
+              </h3>
+              <p style={{ whiteSpace: "pre-wrap" }}>{announcement.message}</p>              <a
+                href={announcement.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "#FF69B4" }}
+              >
+                詳細はこちら
+              </a>
+              <button
+                onClick={() => setAnnouncement(null)}
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  background: "none",
+                  border: "none",
+                  fontSize: "1.5rem",
+                  color: "#999",
+                  cursor: "pointer",
+                }}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </Layout>
   );
 };
