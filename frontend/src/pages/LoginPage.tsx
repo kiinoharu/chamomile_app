@@ -14,7 +14,7 @@ const LoginPage: React.FC = () => {
     e.preventDefault();
     const userData = { user: { username, password } }; 
     try {
-      const response = await apiClient.post('http://localhost:3001/users/sign_in', userData); 
+      const response = await apiClient.post('/users/sign_in', userData);
       console.log(response.data);
       login(); // 認証状態を更新
       navigate('/');
