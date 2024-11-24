@@ -16,8 +16,8 @@ const SignUpPage: React.FC = () => {
    const userData = { user: { username, password, cycle } };
    console.log('User data:', userData); 
    try {
-     const response = await apiClient.post('http://localhost:3001/users', userData );
-     console.log('User registered:', response.data);
+    const response = await apiClient.post('/users', userData);
+    console.log('User registered:', response.data);
      alert('ユーザー登録が完了しました');
      navigate('/');
    } catch (error) {

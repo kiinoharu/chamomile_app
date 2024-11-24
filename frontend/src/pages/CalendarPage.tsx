@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import helpIcon from '../images/help_icon.png';
 import AnnouncementPage from './AnnouncementPage';
 import axios, { AxiosError } from 'axios';
+import apiClient from '../api/apiClient'; 
 
 const CalendarPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -77,7 +78,7 @@ const CalendarPage: React.FC = () => {
 
   const fetchRecords = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/v1/records');
+      const response = await apiClient.get('/records');
       console.log("Fetched raw data from API:", response.data); // APIレスポンスをログに出力
       const fetchedRecords = response.data.reduce((acc: any, record: any) => {
         const formattedDate = new Date(record.record_date).toISOString().split('T')[0]; // YYYY-MM-DD形式に変換
@@ -97,7 +98,7 @@ const CalendarPage: React.FC = () => {
   useEffect(() => {
     const fetchAnnouncement = async () => {
       try {
-        const response = await axios.get("http://localhost:3001/api/v1/announcements");
+        const response = await apiClient.get('/announcements');
         if (response.data.message) {
           setAnnouncement({
             title: "婦人科疾患に関する一般的な情報",
@@ -113,9 +114,6 @@ const CalendarPage: React.FC = () => {
     fetchAnnouncement();
   }, []);
   
-
-  // 下記の構造について、トリガーの変数が読み込まれたり、値が書き換わった場合に処理が走る
-  // useEffect(()=>{処理を記述},[トリガーになる変数を記述])
   useEffect(() => {
     if (isPeriodStart || isPeriodEnd) {
       setShowPeriodIcon(true);
@@ -280,12 +278,8 @@ const CalendarPage: React.FC = () => {
   const handleSaveRecord = async () => {
     if (!selectedDay) return;
   
-    // ユーザーIDを取得
     const userId = isAuthenticated ? 1 : null;
-    if (!userId) {
-      console.error("ユーザーIDが設定されていません");
-      return;
-    }
+    if (!userId) return;
   
     const recordDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
     const recordData = {
@@ -304,41 +298,31 @@ const CalendarPage: React.FC = () => {
     };
   
     try {
-      // まずは同じ日付の記録があるかどうか確認
-      const response = await axios.get(`http://localhost:3001/api/v1/records?record_date=${recordDate}&user_id=${userId}`);
+      const response = await apiClient.get('/records', {
+        params: { record_date: recordDate, user_id: userId },
+      });
   
       if (response.data && response.data.id) {
-        // 記録がある場合は更新
-        await axios.put(`http://localhost:3001/api/v1/records/${response.data.id}`, recordData);
+        await apiClient.put(`/records/${response.data.id}`, recordData);
       } else {
-        // 記録がない場合は新規作成
-        await axios.post('http://localhost:3001/api/v1/records/create_or_update', recordData);
-        console.log("Record saved:", response.data);
+        await apiClient.post('/records/create_or_update', recordData);
       }
   
-      // 保存完了後、記録を更新
       setRecords((prevRecords) => ({
         ...prevRecords,
         [recordDate]: recordData.record,
       }));
-
-      await fetchRecords();
   
-      // 選択された日付を解除してフォームを閉じる
-      setSelectedDay(null);
+      await fetchRecords();
     } catch (error) {
-      const axiosError = error as AxiosError; // error を AxiosError 型にキャスト
-      if (axiosError.response && axiosError.response.status === 404) {
-        await axios.post('http://localhost:3001/api/v1/records', recordData);
-      } else {
-        console.error('Error saving record:', axiosError.response?.data || axiosError.message);
-        alert('記録の保存に失敗しました');
-        return;
-      }
+      console.error("Error in handleSaveRecord:", error);
+      return;
     }
-    navigate('/');
-  };
-
+  
+    setSelectedDay(null); // モーダルを閉じる処理
+    navigate('./'); // モーダルを閉じた後に遷移
+      };
+    
   // 🌙マークを生理期間中に表示する処理
   const getPeriodIcon = (day: number) => {
     const dateKey = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
@@ -359,7 +343,7 @@ const CalendarPage: React.FC = () => {
       const start = new Date(startDates[i]);
       const end = endDates[i] ? new Date(endDates[i]) : null;
   
-      console.log(`Checking period: start=${start}, end=${end}`);
+      // console.log(`Checking period: start=${start}, end=${end}`);
   
       if (start <= currentDate && (!end || currentDate <= end)) {
         console.log(`🌙 Period icon displayed for ${dateKey} (in period: ${start} - ${end})`);
