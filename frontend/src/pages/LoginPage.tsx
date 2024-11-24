@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, User } from '../context/AuthContext';
 import Layout from '../components/Layout';
 import apiClient from '../api/apiClient';
 import { useNavigate } from 'react-router-dom';
@@ -13,13 +13,19 @@ const LoginPage: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const userData = { user: { username, password } }; 
+    const userData = { username, password }; 
     try {
       const response = await apiClient.post('http://localhost:3001/users/sign_in', userData); 
       console.log(response.data);
-      const { username, cycle } = response.data;
-      login({ username, cycle });
-      navigate('/');
+
+      const loggedInUser: User = {
+        id: response.data.id,
+        username: response.data.username,
+        cycle: response.data.cycle,
+      };
+  
+      login(loggedInUser); // login メソッドに渡す
+      navigate('/'); 
     } catch (error) {
       console.error('Login error:', error);
       alert('ログインに失敗しました。');

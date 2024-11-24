@@ -14,6 +14,7 @@ Rails.application.routes.draw do
       end
       resources :announcements, only: [:index]
       resources :users, only: [:update]
+      get 'users/me', to: 'users#show_current'
     end
   end
 end
