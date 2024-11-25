@@ -73,3 +73,7 @@ end
 
 gem 'rack-cors'
 gem 'devise'
+
+group :production do
+  gem 'pg'
+end
