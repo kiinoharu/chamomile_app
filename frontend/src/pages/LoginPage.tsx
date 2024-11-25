@@ -12,18 +12,24 @@ const LoginPage: React.FC = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const userData = { user: { username, password } }; 
+    // const userData = { user: { username, password } }; 
+    
     try {
-      const response = await apiClient.post('/users/sign_in', userData);
-      console.log(response.data);
-      login(); // 認証状態を更新
-      navigate('/');
+      // ログインリクエストを送信
+      await apiClient.post('/users/sign_in', { username, password });
+
+      // ログイン後にユーザー情報を取得
+      const response = await apiClient.get('/users/me');
+      const userId = response.data.id;
+      login(userId);
+
+      // リダイレクトや通知処理など
+      console.log('ログイン成功');
     } catch (error) {
       console.error('Login error:', error);
       alert('ログインに失敗しました。');
     }
   };
-
   const handleGuestLogin = () => {
     guestLogin();
     navigate('/');

@@ -1,10 +1,14 @@
 class ApplicationController < ActionController::Base
-  before_action :configure_sign_up_params, if: :devise_controller?
+  before_action :authenticate_user! # Devise による認証を有効化
+  before_action :configure_permitted_parameters, if: :devise_controller?
 
-  protect_from_forgery with: :null_session, if: -> { request.format.json? }
+  protect_from_forgery with: :exception, unless: -> { request.format.json? }
 
-  private
-  def configure_sign_up_params
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:username, :password, :cycle])
+  protected
+
+  # Deviseストロングパラメータ設定
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:username, :cycle])
+    devise_parameter_sanitizer.permit(:sign_in, keys: [:username])
   end
 end

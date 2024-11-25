@@ -54,6 +54,18 @@ class Api::V1::RecordsController < ApplicationController
       render json: { error: "Record not found" }, status: :not_found
     end
   end
+
+  def last_period
+    last_period_record = Record.where(user_id: current_user.id, is_period_start: true)
+                               .order(record_date: :desc)
+                               .first
+
+    if last_period_record
+      render json: { last_period_start_date: last_period_record.record_date }
+    else
+      render json: { error: "No period start records found" }, status: :not_found
+    end
+  end
   
   private
 

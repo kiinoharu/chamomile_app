@@ -94,20 +94,38 @@ const CalendarPage: React.FC = () => {
       console.error('Error fetching records:', error);
     }
   };
-
   useEffect(() => {
     const fetchAnnouncement = async () => {
       try {
-        const response = await apiClient.get('/announcements');
-        if (response.data.message) {
-          setAnnouncement({
-            title: "婦人科疾患に関する一般的な情報",
-            message: response.data.message,
-            link: response.data.message,
-          });
+        // 1. APIで最後の生理開始日と生理周期を取得
+        const lastPeriodResponse = await apiClient.get('/records/last_period'); // Railsでエンドポイントを実装
+        const userCycleResponse = await apiClient.get('/users/cycle'); // ユーザーの周期を取得
+  
+        const lastPeriodStartDate = new Date(lastPeriodResponse.data.last_period_start_date);
+        const userCycle = userCycleResponse.data.cycle;
+        const currentDate = new Date();
+  
+        // 2. 生理周期のずれを計算
+        const expectedStartDate = new Date(lastPeriodStartDate);
+        expectedStartDate.setDate(lastPeriodStartDate.getDate() + userCycle);
+  
+        const daysDifference = Math.abs(
+          Math.ceil((currentDate.getTime() - expectedStartDate.getTime()) / (1000 * 60 * 60 * 24))
+        );
+  
+        // 3. ずれが3日以上の場合にアナウンスを取得
+        if (daysDifference > 3) {
+          const announcementResponse = await apiClient.get('/announcements');
+          if (announcementResponse.data.message) {
+            setAnnouncement({
+              title: "婦人科疾患に関する一般的な情報",
+              message: announcementResponse.data.message,
+              link: announcementResponse.data.link,
+            });
+          }
         }
       } catch (error) {
-        console.error("Error fetching announcement:", error);
+        console.error("Error fetching data:", error);
       }
     };
   

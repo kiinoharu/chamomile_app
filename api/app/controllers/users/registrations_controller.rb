@@ -1,8 +1,7 @@
 module Users
   class RegistrationsController < Devise::RegistrationsController
+    skip_before_action :verify_authenticity_token, only: [:create]
     before_action :configure_sign_up_params, only: [:create]
-
-    protect_from_forgery with: :null_session
 
     protected
 
