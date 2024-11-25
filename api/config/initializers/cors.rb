@@ -1,7 +1,7 @@
 # config/initializers/cors.rb
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins 'http://localhost:3000' 
+    origins 'https://chamomile-app-1.onrender.com' 
     resource '*',
       headers: :any,
       methods: [:get, :post, :put, :patch, :delete, :options, :head],
