@@ -11,10 +11,10 @@
 カモミールは、リラックス効果や痛みを和らげる効果があることから、生理周期管理アプリ名に合っていると思い、命名しました。
 
 ## 機能一覧
-| トップページ | ログイン画面 | 記録フォーム　　 |
+| ログイン画面 | トップページ | 記録フォーム　　 |
 |:----------:|:-----------:|:------------:|
-| <img width="300" src="https://i.gyazo.com/2ebb2eb3165192f3fe062c2b8f3a4804.png">| <img width="300" src="https://i.gyazo.com/cbdd7faf4defb505e1f3b39b3dcd7fa4.png">| <img width="50" src="hhttps://i.gyazo.com/cbdd7faf4defb505e1f3b39b3dcd7fa4.png">|
-| column     | column      | column       |
+|<img width="1200" src="https://i.gyazo.com/cbdd7faf4defb505e1f3b39b3dcd7fa4.png"> |<img width="300" src="https://i.gyazo.com/2ebb2eb3165192f3fe062c2b8f3a4804.png"> |<a href="https://gyazo.com/df8c2c15018e8cc060793282eb8cb298"><img src="https://i.gyazo.com/df8c2c15018e8cc060793282eb8cb298.png" alt="Image from Gyazo" width="300"/></a>|
+| ゲストログインボタンをクリックすることで、簡易的にログイン可能です。 | トップページ(/)にてユーザーの生理周期管理画面を表示し、これまでの記録状況を一目で確認できる仕様にしています。また、下部に最新のお知らせとして、婦人系疾患に関する情報を表示し、情報へのアクセスを容易にしています。 | 登録したい日付をクリックすることで、この記録フォームがポップアップにて表示されます。右上の`？`マークを押下することで、記録方法を表示します。その他は「使い方」ページを参照ください。 |
 | will       | will        | will         |
 | be         | be          | be           |
 | left       | right       | center       |
