@@ -56,17 +56,23 @@ class Api::V1::RecordsController < ApplicationController
   end
 
   def last_period
+    Rails.logger.info "Current User: #{current_user.inspect}"
+  
+    if current_user.nil?
+      render json: { error: "Not authenticated" }, status: :unauthorized
+      return
+    end
+  
     last_period_record = Record.where(user_id: current_user.id, is_period_start: true)
                                .order(record_date: :desc)
                                .first
-
+  
     if last_period_record
       render json: { last_period_start_date: last_period_record.record_date }
     else
       render json: { error: "No period start records found" }, status: :not_found
     end
-  end
-  
+  end  
   private
 
   def set_record

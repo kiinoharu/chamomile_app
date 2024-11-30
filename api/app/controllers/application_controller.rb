@@ -2,8 +2,13 @@ class ApplicationController < ActionController::Base
   before_action :authenticate_user! # Devise による認証を有効化
   before_action :configure_permitted_parameters, if: :devise_controller?
 
-  protect_from_forgery with: :exception, unless: -> { request.format.json? }
+  # HTMLではなくJSON形式でエラーレスポンスを返す
+  rescue_from Devise::MissingWarden do
+    render json: { error: "You must log in to access this resource" }, status: :unauthorized
+  end
 
+  protect_from_forgery with: :null_session, if: -> { request.format.json? }
+  
   protected
 
   # Deviseストロングパラメータ設定

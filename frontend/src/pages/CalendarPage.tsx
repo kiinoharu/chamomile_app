@@ -39,6 +39,12 @@ const CalendarPage: React.FC = () => {
       "生理周期に乱れがあるようです。婦人系疾患に関する情報をご提供します。必要であれば専門機関の受診を推奨します。\n\n女性の健康を保つためには、婦人科疾患の予防と早期診断が重要です。月経異常や下腹部の痛みなど、婦人科系の症状にはさまざまなサインがあります。詳細な情報については以下の医師をご覧ください。",
     link: "https://www.aska-pharma.co.jp/mint/womanhealth/joseinobyoki/", 
   });
+  const [userData, setUserData] = useState<{
+    id: number;
+    username: string;
+    cycle: number;
+  } | null>(null);
+  
   
   const announcements = [
     {
@@ -94,6 +100,29 @@ const CalendarPage: React.FC = () => {
       console.error('Error fetching records:', error);
     }
   };
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await apiClient.get('/users/me'); // APIエンドポイントからデータを取得
+        setUserData(response.data); // 取得したデータを状態に保存
+      } catch (error) {
+        console.error('Failed to fetch user data:', error);
+        // 必要であればエラー処理を追加
+      }
+    };
+  
+    if (isAuthenticated) {
+      fetchUserData(); // 認証されている場合にのみデータを取得
+    }
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      navigate('/login'); // 認証されていない場合、ログインページへリダイレクト
+    }
+  }, [isAuthenticated, navigate]);
+
   useEffect(() => {
     const fetchAnnouncement = async () => {
       try {
@@ -294,15 +323,12 @@ const CalendarPage: React.FC = () => {
   // 記録を保存する処理
 
   const handleSaveRecord = async () => {
-    if (!selectedDay) return;
-  
-    const userId = isAuthenticated ? 1 : null;
-    if (!userId) return;
+    if (!selectedDay || !userData) return;
   
     const recordDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
     const recordData = {
       record: {
-        user_id: userId,
+        user_id: userData.id, // ログイン中のユーザーIDを使用
         record_date: recordDate,
         temperature: temperature ? parseFloat(temperature) : null,
         weight: weight ? parseFloat(weight) : null,
@@ -317,7 +343,7 @@ const CalendarPage: React.FC = () => {
   
     try {
       const response = await apiClient.get('/records', {
-        params: { record_date: recordDate, user_id: userId },
+        params: { record_date: recordDate, user_id: userData.id },
       });
   
       if (response.data && response.data.id) {
@@ -333,14 +359,14 @@ const CalendarPage: React.FC = () => {
   
       await fetchRecords();
     } catch (error) {
-      console.error("Error in handleSaveRecord:", error);
+      console.error('Error in handleSaveRecord:', error);
       return;
     }
   
     setSelectedDay(null); // モーダルを閉じる処理
     navigate('./'); // モーダルを閉じた後に遷移
-      };
-    
+  };
+      
   // 🌙マークを生理期間中に表示する処理
   const getPeriodIcon = (day: number) => {
     const dateKey = `${year}-${month.toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;

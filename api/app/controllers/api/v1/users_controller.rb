@@ -3,9 +3,13 @@ class Api::V1::UsersController < ApplicationController
 
   # ログイン中のユーザー情報を取得
   def me
-    render json: { id: current_user.id, username: current_user.username, cycle: current_user.cycle }
+    if current_user
+      render json: { id: current_user.id, username: current_user.username, cycle: current_user.cycle }
+    else
+      render json: { error: "Not authenticated" }, status: :unauthorized
+    end
   end
-
+  
   # ユーザー情報を取得する
   def show
     user = User.find(params[:id])
