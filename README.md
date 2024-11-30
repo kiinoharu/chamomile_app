@@ -11,13 +11,22 @@
 カモミールは、リラックス効果や痛みを和らげる効果があることから、生理周期管理アプリ名に合っていると思い、命名しました。
 
 ## 機能一覧
-| ログイン画面 | トップページ | 記録フォーム　　 |
+| ログイン画面 | トップ画面 | 記録フォーム　　 |
 |:----------:|:-----------:|:------------:|
 |<img width="1200" src="https://i.gyazo.com/cbdd7faf4defb505e1f3b39b3dcd7fa4.png"> |<img width="300" src="https://i.gyazo.com/2ebb2eb3165192f3fe062c2b8f3a4804.png"> |<a href="https://gyazo.com/df8c2c15018e8cc060793282eb8cb298"><img src="https://i.gyazo.com/df8c2c15018e8cc060793282eb8cb298.png" alt="Image from Gyazo" width="300"/></a>|
 | ゲストログインボタンをクリックすることで、簡易的にログイン可能です。 | トップページ(/)にてユーザーの生理周期管理画面を表示し、これまでの記録状況を一目で確認できる仕様にしています。また、下部に最新のお知らせとして、婦人系疾患に関する情報を表示し、情報へのアクセスを容易にしています。 | 登録したい日付をクリックすることで、この記録フォームがポップアップにて表示されます。右上の`？`マークを押下することで、記録方法を表示します。その他は「使い方」ページを参照ください。 |
-| will       | will        | will         |
-| be         | be          | be           |
-| left       | right       | center       |
-| aligned    | aligned     | aligned      |
 
+| 掲示板画面 | 掲示板内容 | 使い方画面　 |
+|:----------:|:-----------:|:------------:|
+|<img width="1000" src="https://i.gyazo.com/5e43f9e2d523508d1ec4f7f0e4d075df.png">|![Image from Gyazo](https://i.gyazo.com/280235766d5d3e66231e7b89ecfbb148.png) |<img width="1200" src="https://i.gyazo.com/b3c96f13626f2771fcb4d0254b670088.png">|
+| 子宮頸がんを筆頭に婦人系疾患に関する情報を掲示する画面です。閲覧したい項目をクリックすることで、閲覧できます。 | 掲示板の項目をクリックすることで、簡易的な情報＋詳細情報記載HPへのリンク先が表示されます。 | このアプリの使用用途および記録の仕方を解説しているページです。 |
 
+## 使用技術
+| Category   | Technology Stack |
+|:-----------|:-----------------|
+| Frontend   | React,TypeScript |
+| Backend    | Rails            |
+| Database   | PostgreSQL       |
+
+## ER図
+[![Image from Gyazo](https://i.gyazo.com/53b8462c719d2ae1ed8573dba3735987.png)](https://gyazo.com/53b8462c719d2ae1ed8573dba3735987)
