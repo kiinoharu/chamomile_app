@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import helpIcon from '../images/help_icon.png';
 import apiClient from '../api/apiClient'; 
+import axiosInstance from '../api/axiosInstance';
 
 const CalendarPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -27,6 +28,7 @@ const CalendarPage: React.FC = () => {
   const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [records, setRecords] = useState<{ [key: string]: any }>({});
   const [showPeriodIcon, setShowPeriodIcon] = useState<boolean>(false);
+  const [recordData, setRecordData] = useState({ date: '', value: '' });
   // const [announcement, setAnnouncement] = useState<{
   //   title: string;
   //   message: string;
@@ -52,6 +54,16 @@ const CalendarPage: React.FC = () => {
       date: new Date("2024-11-02")
     },
   ];
+
+  const saveRecord = async () => {
+    try {
+      // 記録保存APIのリクエスト
+      await axiosInstance.post('/records', recordData);
+      alert('記録を保存しました！');
+    } catch (error) {
+      console.error(error); // エラーのログを出力
+    }
+  };
 
   const latestAnnouncements = announcements
   .sort((a, b) => b.date.getTime() - a.date.getTime()) 
@@ -277,7 +289,11 @@ const CalendarPage: React.FC = () => {
     if (!selectedDay) return;
   
     const userId = isAuthenticated ? 1 : null;
-    if (!userId) return;
+    if (!userId) {
+      alert("ログインが必要です。ログインしてください。");
+      navigate("/login"); // ログインページへ遷移
+      return;
+    }
   
     const recordDate = `${year}-${month.toString().padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`;
     const recordData = {
@@ -296,16 +312,20 @@ const CalendarPage: React.FC = () => {
     };
   
     try {
+      // 既存の記録があるかを確認
       const response = await apiClient.get('/records', {
         params: { record_date: recordDate, user_id: userId },
       });
   
       if (response.data && response.data.id) {
+        // 既存の記録を更新
         await apiClient.put(`/records/${response.data.id}`, recordData);
       } else {
+        // 新規記録を作成
         await apiClient.post('/records/create_or_update', recordData);
       }
   
+      // 状態を更新し、カレンダーを再レンダリング
       setRecords((prevRecords) => ({
         ...prevRecords,
         [recordDate]: recordData.record,
@@ -313,13 +333,19 @@ const CalendarPage: React.FC = () => {
   
       await fetchRecords();
     } catch (error) {
-      console.error("Error in handleSaveRecord:", error);
+      // if {
+      //   alert("認証エラーが発生しました。ログインしてください。");
+      //   navigate("/login"); // ログインページへ遷移
+      // } else {
+      //   console.error("Error in handleSaveRecord:", error);
+      // }
       return;
     }
   
     setSelectedDay(null); // モーダルを閉じる処理
     navigate('./'); // モーダルを閉じた後に遷移
-      };
+  };
+  
     
   // 🌙マークを生理期間中に表示する処理
   const getPeriodIcon = (day: number) => {
