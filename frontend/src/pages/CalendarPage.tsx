@@ -3,8 +3,6 @@ import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 import helpIcon from '../images/help_icon.png';
-import AnnouncementPage from './AnnouncementPage';
-import axios, { AxiosError } from 'axios';
 import apiClient from '../api/apiClient'; 
 
 const CalendarPage: React.FC = () => {
@@ -29,16 +27,16 @@ const CalendarPage: React.FC = () => {
   const [showHelpPopup, setShowHelpPopup] = useState(false);
   const [records, setRecords] = useState<{ [key: string]: any }>({});
   const [showPeriodIcon, setShowPeriodIcon] = useState<boolean>(false);
-  const [announcement, setAnnouncement] = useState<{
-    title: string;
-    message: string;
-    link: string;
-  } | null>({
-    title: "婦人科疾患に関する一般的な情報",
-    message:
-      "生理周期に乱れがあるようです。婦人系疾患に関する情報をご提供します。必要であれば専門機関の受診を推奨します。\n\n女性の健康を保つためには、婦人科疾患の予防と早期診断が重要です。月経異常や下腹部の痛みなど、婦人科系の症状にはさまざまなサインがあります。詳細な情報については以下の医師をご覧ください。",
-    link: "https://www.aska-pharma.co.jp/mint/womanhealth/joseinobyoki/", 
-  });
+  // const [announcement, setAnnouncement] = useState<{
+  //   title: string;
+  //   message: string;
+  //   link: string;
+  // } | null>({
+  //   title: "婦人科疾患に関する一般的な情報",
+  //   message:
+  //     "生理周期に乱れがあるようです。婦人系疾患に関する情報をご提供します。必要であれば専門機関の受診を推奨します。\n\n女性の健康を保つためには、婦人科疾患の予防と早期診断が重要です。月経異常や下腹部の痛みなど、婦人科系の症状にはさまざまなサインがあります。詳細な情報については以下の医師をご覧ください。",
+  //   link: "https://www.aska-pharma.co.jp/mint/womanhealth/joseinobyoki/", 
+  // });
   
   const announcements = [
     {
@@ -95,24 +93,24 @@ const CalendarPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchAnnouncement = async () => {
-      try {
-        const response = await apiClient.get('/announcements');
-        if (response.data.message) {
-          setAnnouncement({
-            title: "婦人科疾患に関する一般的な情報",
-            message: response.data.message,
-            link: response.data.message,
-          });
-        }
-      } catch (error) {
-        console.error("Error fetching announcement:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchAnnouncement = async () => {
+  //     try {
+  //       const response = await apiClient.get('/announcements');
+  //       if (response.data.message) {
+  //         setAnnouncement({
+  //           title: "婦人科疾患に関する一般的な情報",
+  //           message: response.data.message,
+  //           link: response.data.message,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching announcement:", error);
+  //     }
+  //   };
   
-    fetchAnnouncement();
-  }, []);
+  //   fetchAnnouncement();
+  // }, []);
   
   useEffect(() => {
     if (isPeriodStart || isPeriodEnd) {
@@ -358,12 +356,12 @@ const CalendarPage: React.FC = () => {
   
   
 
-const toggleIsPeriodEnd = () => {
-  setIsPeriodEnd((prev) => !prev);
-  if (!isPeriodEnd) {
-    setIsPeriodStart(false);
-  }
-};
+// const toggleIsPeriodEnd = () => {
+//   setIsPeriodEnd((prev) => !prev);
+//   if (!isPeriodEnd) {
+//     setIsPeriodStart(false);
+//   }
+// };
 
 const calendarDays = useMemo(() => {
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
@@ -866,7 +864,7 @@ const calendarDays = useMemo(() => {
             </div>
           </div>
         )}
-        {announcement && (
+        {/* {announcement && (
           <div
             style={{
               position: "fixed",
@@ -922,7 +920,7 @@ const calendarDays = useMemo(() => {
               </button>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </Layout>
   );
