@@ -27,11 +27,11 @@
 <br><br>
 
 ## 使用技術
-| Category   | Technology Stack |
-|:-----------|:-----------------|
-| Frontend   | React,TypeScript |
-| Backend    | Rails            |
-| Database   | PostgreSQL       |
+| Category   | Technology Stack |Version |
+|:-----------|:-----------------|:-------|
+| Frontend   | React,TypeScript |React: v18.3.1, TypeScript: v4.9.5|
+| Backend    | Rails            |Rails: v7.0.8.6|
+| Database   | PostgreSQL       |PostgreSQL: v14.13|
 
 <br><br>
 
